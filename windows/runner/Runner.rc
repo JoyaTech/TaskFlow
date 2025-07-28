@@ -89,6 +89,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
+<<<<<<< HEAD
             VALUE "CompanyName", "com.example" "\0"
             VALUE "FileDescription", "mindflow_new" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
@@ -96,6 +97,15 @@ BEGIN
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "mindflow_new.exe" "\0"
             VALUE "ProductName", "mindflow_new" "\0"
+=======
+            VALUE "CompanyName", "com.mycompany" "\0"
+            VALUE "FileDescription", "mindflow" "\0"
+            VALUE "FileVersion", VERSION_AS_STRING "\0"
+            VALUE "InternalName", "mindflow" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.mycompany. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mindflow.exe" "\0"
+            VALUE "ProductName", "mindflow" "\0"
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "mindflow_new",
     "short_name": "mindflow_new",
+=======
+    "name": "dreamflow_counter",
+    "short_name": "dreamflow_counter",
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,6 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<<<<<<< HEAD
     <application
         android:label="mindflow_new"
+=======
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <application
+        android:label="dreamflow"
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

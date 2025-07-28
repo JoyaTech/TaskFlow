@@ -1,10 +1,18 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+<<<<<<< HEAD
 project(mindflow_new LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "mindflow_new")
+=======
+project(mindflow LANGUAGES CXX)
+
+# The name of the executable created for the application. Change this to change
+# the on-disk name of your application.
+set(BINARY_NAME "mindflow")
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

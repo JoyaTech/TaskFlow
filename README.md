@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # mindflow_new
+=======
+# mindflow
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 
 A new Flutter project.
 

@@ -5,7 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
+<<<<<<< HEAD
 	<string>Mindflow New</string>
+=======
+	<string>Dreamflow</string>
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +17,11 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
+<<<<<<< HEAD
 	<string>mindflow_new</string>
+=======
+	<string>dreamflow</string>
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,5 +53,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+<<<<<<< HEAD
+=======
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access for voice assistant features.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 </dict>
 </plist>

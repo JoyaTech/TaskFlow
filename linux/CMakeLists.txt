@@ -4,10 +4,17 @@ project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
+<<<<<<< HEAD
 set(BINARY_NAME "mindflow_new")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.example.mindflow_new")
+=======
+set(BINARY_NAME "mindflow")
+# The unique GTK application identifier for this application. See:
+# https://wiki.gnome.org/HowDoI/ChooseApplicationID
+set(APPLICATION_ID "com.mycompany.mindflow")
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

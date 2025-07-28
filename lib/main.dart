@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 
 void main() {
+=======
+import 'package:firebase_core/firebase_core.dart';
+import 'package:mindflow/theme.dart';
+import 'package:mindflow/home_page.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+<<<<<<< HEAD
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -117,6 +131,18 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+=======
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'MindFlow - עוזר המשימות הישראלי',
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
+      home: const HomePage(),
+      locale: const Locale('he', 'IL'),
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
     );
   }
 }

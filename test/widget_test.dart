@@ -8,7 +8,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+<<<<<<< HEAD
 import 'package:mindflow_new/main.dart';
+=======
+import 'package:mindflow/main.dart';
+>>>>>>> 77ad5bd679ae5b96ff6c051aab6470fb6b13f24f
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
