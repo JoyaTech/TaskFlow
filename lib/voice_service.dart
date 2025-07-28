@@ -30,7 +30,7 @@ class VoiceService {
           recognizedText = result.recognizedWords;
         },
         localeId: 'he-IL', // Hebrew locale
-        listenMode: ListenMode.dictation,
+        listenOptions: SpeechListenOptions(listenMode: ListenMode.dictation),
       );
 
       // Wait for speech to complete
