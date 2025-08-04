@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBWe_80pDDW4q8qatbtT4YN6u-RNbR3fw8',
+    apiKey: 'AIzaSyBWe_80pDDW4q8qatbtT4YN6u-RNbR8fw8',
     appId: '1:915157123985:web:425c66d080e72680afd030',
     messagingSenderId: '915157123985',
     projectId: 'taskflow-128iw',
@@ -53,20 +53,20 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBWe_80pDDW4q8qatbtT4YN6u-RNbR3fw8',
-    appId: '1:915157123985:android:425c66d080e72680afd030',
+    apiKey: 'AIzaSyCbworZMXXTzUVuXht16uxN4iW2xYyyCp8',
+    appId: '1:915157123985:android:dd4ee16a3f96d8d5afd030',
     messagingSenderId: '915157123985',
     projectId: 'taskflow-128iw',
     storageBucket: 'taskflow-128iw.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBWe_80pDDW4q8qatbtT4YN6u-RNbR3fw8',
-    appId: '1:915157123985:ios:425c66d080e72680afd030',
+    apiKey: 'AIzaSyCnSjK2zosxBql_RNgfpykGYjm7lQetZeM',
+    appId: '1:915157123985:ios:0f06f1bcb3c181ebafd030',
     messagingSenderId: '915157123985',
     projectId: 'taskflow-128iw',
     storageBucket: 'taskflow-128iw.firebasestorage.app',
-    iosBundleId: 'com.example.mindFlow',
+    iosBundleId: 'com.mycompany.CounterApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

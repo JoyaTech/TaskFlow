@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "915157123985",
+    "project_id": "taskflow-128iw",
+    "storage_bucket": "taskflow-128iw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915157123985:android:dd4ee16a3f96d8d5afd030",
+        "android_client_info": {
+          "package_name": "com.mycompany.CounterApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbworZMXXTzUVuXht16uxN4iW2xYyyCp8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

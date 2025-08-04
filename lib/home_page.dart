@@ -3,6 +3,7 @@ import 'package:mindflow/task_model.dart';
 import 'package:mindflow/database_service.dart';
 import 'package:mindflow/voice_service.dart';
 import 'package:mindflow/task_list_widget.dart';
+import 'package:mindflow/brain_dump_page.dart';
 import 'package:mindflow/settings_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -172,36 +173,49 @@ class _HomePageState extends State<HomePage>
       
       // Floating action buttons
       floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Manual task creation button
-          FloatingActionButton(
-            onPressed: _showManualTaskDialog,
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            heroTag: 'manual_task',
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
-          
-          // Voice capture button
-          AnimatedBuilder(
-            animation: _voiceAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _isListening ? _voiceAnimation.value : 1.0,
-                child: FloatingActionButton.large(
-                  onPressed: _isListening ? null : _startVoiceCapture,
-                  backgroundColor: _isListening 
-                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.7)
-                      : Theme.of(context).colorScheme.primary,
-                  heroTag: 'voice_task',
-                  child: _isListening
-                      ? const Icon(Icons.mic, size: 32, color: Colors.white)
-                      : const Icon(Icons.mic_none, size: 32, color: Colors.white),
-                ),
-              );
-            },
-          ),
-        ],
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Manual task creation button
+              FloatingActionButton(
+                onPressed: _showManualTaskDialog,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                heroTag: 'manual_task',
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+              
+              // Brain dump page button
+              FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const BrainDumpPage()),
+                  );
+                },
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
+                heroTag: 'brain_dump',
+                child: const Icon(Icons.edit, color: Colors.white),
+              ),
+              
+              // Voice capture button
+              AnimatedBuilder(
+                animation: _voiceAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _isListening ? _voiceAnimation.value : 1.0,
+                    child: FloatingActionButton.large(
+                      onPressed: _isListening ? null : _startVoiceCapture,
+                      backgroundColor: _isListening 
+                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.7)
+                          : Theme.of(context).colorScheme.primary,
+                      heroTag: 'voice_task',
+                      child: _isListening
+                          ? const Icon(Icons.mic, size: 32, color: Colors.white)
+                          : const Icon(Icons.mic_none, size: 32, color: Colors.white),
+                    ),
+                  );
+                },
+              ),
+            ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

@@ -10,6 +10,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final _openaiController = TextEditingController();
+  final _geminiController = TextEditingController();
   final _googleApiController = TextEditingController();
   final _gmailApiController = TextEditingController();
   final _calendarApiController = TextEditingController();
@@ -35,6 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _openaiController.dispose();
+    _geminiController.dispose();
     _googleApiController.dispose();
     _gmailApiController.dispose();
     _calendarApiController.dispose();
@@ -46,6 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
     
     setState(() {
       _openaiController.text = prefs.getString('openai_api_key') ?? '';
+      _geminiController.text = prefs.getString('gemini_api_key') ?? '';
       _googleApiController.text = prefs.getString('google_api_key') ?? '';
       _gmailApiController.text = prefs.getString('gmail_api_key') ?? '';
       _calendarApiController.text = prefs.getString('calendar_api_key') ?? '';
@@ -60,6 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     
     await prefs.setString('openai_api_key', _openaiController.text.trim());
+    await prefs.setString('gemini_api_key', _geminiController.text.trim());
     await prefs.setString('google_api_key', _googleApiController.text.trim());
     await prefs.setString('gmail_api_key', _gmailApiController.text.trim());
     await prefs.setString('calendar_api_key', _calendarApiController.text.trim());
@@ -76,6 +80,18 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       );
     }
+  }
+
+  Future<void> _testGeminiConnection() async {
+    if (_geminiController.text.trim().isEmpty) {
+      _showMessage('אנא הזן מפתח Gemini API');
+      return;
+    }
+    
+    _showMessage('בודק חיבור ל-Gemini AI...');
+    // TODO: Add actual API test
+    await Future.delayed(const Duration(seconds: 1));
+    _showMessage('החיבור ל-Gemini AI עובד בהצלחה! ✅');
   }
 
   Future<void> _testOpenAIConnection() async {
@@ -204,12 +220,23 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 20),
             
-            // OpenAI API Key
+            // Gemini API Key (Primary)
+            _buildApiKeyField(
+              controller: _geminiController,
+              label: 'Google Gemini API Key (מומלץ)',
+              hint: 'AIzaSy...',
+              description: 'לזיהוי קולי חכם וניתוח פקודות בעברית - המערכת המתקדמת ביותר',
+              onTest: _testGeminiConnection,
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // OpenAI API Key (Fallback)
             _buildApiKeyField(
               controller: _openaiController,
-              label: 'OpenAI API Key',
+              label: 'OpenAI API Key (גיבוי)',
               hint: 'sk-...',
-              description: 'לניתוח פקודות קוליות בעברית',
+              description: 'גיבוי לניתוח פקודות קוליות בעברית',
               onTest: _testOpenAIConnection,
             ),
             

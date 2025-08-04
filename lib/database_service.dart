@@ -165,6 +165,81 @@ class DatabaseService {
     }
   }
 
+  /// Advanced search and filtering
+  static Future<List<Task>> searchAndFilterTasks({
+    String query = '',
+    TaskType? type,
+    TaskPriority? priority,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCompleted,
+    String sortBy = 'createdAt',
+    bool descending = true,
+  }) async {
+    try {
+      Query queryRef = _tasksCollection;
+      
+      // Apply filters
+      if (type != null) {
+        queryRef = queryRef.where('type', isEqualTo: type.index);
+      }
+      
+      if (priority != null) {
+        queryRef = queryRef.where('priority', isEqualTo: priority.index);
+      }
+      
+      if (isCompleted != null) {
+        queryRef = queryRef.where('isCompleted', isEqualTo: isCompleted);
+      }
+      
+      if (startDate != null) {
+        queryRef = queryRef.where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+      }
+      
+      if (endDate != null) {
+        queryRef = queryRef.where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+      }
+      
+      // Apply sorting
+      queryRef = queryRef.orderBy(sortBy, descending: descending);
+      
+      final querySnapshot = await queryRef.get();
+      
+      List<Task> tasks = querySnapshot.docs
+          .map((doc) => Task.fromFirestore(doc))
+          .toList();
+      
+      // Apply text search filter on the client side
+      if (query.isNotEmpty) {
+        tasks = tasks.where((task) =>
+            task.title.toLowerCase().contains(query.toLowerCase()) ||
+            task.description.toLowerCase().contains(query.toLowerCase()) ||
+            (task.voiceNote?.toLowerCase().contains(query.toLowerCase()) ?? false)).toList();
+      }
+      
+      return tasks;
+    } catch (e) {
+      throw Exception('Failed to search and filter tasks: $e');
+    }
+  }
+
+  /// Get tasks by date range
+  static Future<List<Task>> getTasksByDateRange(DateTime startDate, DateTime endDate) async {
+    try {
+      final querySnapshot = await _tasksCollection
+          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .orderBy('createdAt', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => Task.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get tasks by date range: $e');
+    }
+  }
+
   static Future<void> initSampleData() async {
     try {
       final now = DateTime.now();

@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mindflow/task_model.dart';
+import 'package:mindflow/task_model.dart' as taskModel;
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class VoiceService {
   static final SpeechToText _speechToText = SpeechToText();
@@ -56,94 +57,140 @@ class VoiceService {
   static Future<TaskParseResult?> parseHebrewCommand(String hebrewText) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final openaiKey = prefs.getString('openai_api_key');
+      final geminiApiKey = prefs.getString('gemini_api_key');
       
-      if (openaiKey == null || openaiKey.isEmpty) {
+      if (geminiApiKey == null || geminiApiKey.isEmpty) {
         // Fallback to simple parsing for demo
         return _simpleParseHebrew(hebrewText);
       }
 
-      final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $openaiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {
-              'role': 'system',
-              'content': '''אתה עוזר שמנתח פקודות קוליות בעברית למשימות. 
-החזר תמיד JSON בפורמט הזה:
+      // Initialize Gemini model
+      final model = GenerativeModel(
+        model: 'gemini-pro',
+        apiKey: geminiApiKey,
+      );
+
+      // Create the prompt for Hebrew NLU
+      final prompt = '''
+אתה עוזר חכם לאפליקציית פרודוקטיביות "Focus Flow" המיועדת לאנשים עם ADHD.
+המשימה שלך היא לנתח בקשות בעברית ולהחזיר JSON מובנה.
+
+החזר תמיד JSON בפורמט הזה בלבד:
 {
-  "title": "כותרת המשימה",
-  "description": "תיאור אופציונלי",
-  "dueDate": "2024-01-15T15:00:00Z" או null,
-  "priority": "important" או "simple" או "later",
-  "type": "task" או "reminder" או "note" או "event"
+  "intent": "create_task" או "create_reminder" או "create_note" או "create_event",
+  "entities": {
+    "content": "התוכן הנדש",
+    "date": "2025-08-05" או null,
+    "time": "14:30" או null,
+    "priority": "important" או "simple" או "later"
+  }
 }
 
 דוגמאות:
-"צור משימה מחר בשלוש לכבס כביסה" → task עם dueDate מחר בשעה 15:00
-"תזכיר לי להתקשר לאמא הערב" → reminder עם dueDate היום בערב
-"כתוב פתק להביא מטען" → note ללא dueDate
-"קבע פגישה עם דן ביום ראשון בצהריים" → event ביום ראשון בצהריים'''
-            },
-            {
-              'role': 'user',
-              'content': hebrewText,
-            }
-          ],
-          'max_tokens': 200,
-          'temperature': 0.3,
-        }),
-      );
+"צור משימה מחר בשלוש לכבס כביסה" → intent: "create_task", content: "לכבס כביסה", date: "2025-08-05", time: "15:00"
+"תזכיר לי להתקשר לאמא הערב" → intent: "create_reminder", content: "להתקשר לאמא", date: היום, time: "19:00"
+"כתוב פתק להביא מטען" → intent: "create_note", content: "להביא מטען", date: null, time: null
+"פגישה עם דן ביום ראשון בצהריים" → intent: "create_event", content: "פגישה עם דן", date: יום ראשון הקרוב, time: "12:00"
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['choices'][0]['message']['content'];
-        final parsedData = jsonDecode(content);
-        
-        return TaskParseResult(
-          title: parsedData['title'],
-          description: parsedData['description'] ?? '',
-          dueDate: parsedData['dueDate'] != null 
-              ? DateTime.parse(parsedData['dueDate']) 
-              : null,
-          priority: _parsePriority(parsedData['priority']),
-          type: _parseType(parsedData['type']),
-          originalText: hebrewText,
-        );
+נתח את הבקשה הבאה והחזר רק JSON:
+$hebrewText''';
+
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+
+      if (response.text != null && response.text!.isNotEmpty) {
+        try {
+          // Clean the response to extract JSON only
+          String jsonString = response.text!.trim();
+          if (jsonString.startsWith('```json')) {
+            jsonString = jsonString.substring(7);
+          }
+          if (jsonString.endsWith('```')) {
+            jsonString = jsonString.substring(0, jsonString.length - 3);
+          }
+          
+          final parsedData = jsonDecode(jsonString);
+          final entities = parsedData['entities'] ?? {};
+          
+          // Parse date if provided
+          DateTime? dueDate;
+          if (entities['date'] != null) {
+            try {
+              dueDate = DateTime.parse(entities['date']);
+              // Add time if provided
+              if (entities['time'] != null) {
+                final timeParts = entities['time'].split(':');
+                if (timeParts.length >= 2) {
+                  final hour = int.tryParse(timeParts[0]) ?? 9;
+                  final minute = int.tryParse(timeParts[1]) ?? 0;
+                  dueDate = DateTime(
+                    dueDate.year,
+                    dueDate.month,
+                    dueDate.day,
+                    hour,
+                    minute,
+                  );
+                }
+              }
+            } catch (e) {
+              if (kDebugMode) print('Date parsing error: $e');
+            }
+          }
+          
+          return TaskParseResult(
+            title: entities['content'] ?? hebrewText,
+            description: 'נוצר באמצעות זיהוי קולי חכם',
+            dueDate: dueDate,
+            priority: _parsePriority(entities['priority'] ?? 'simple'),
+            type: _parseTypeFromIntent(parsedData['intent'] ?? 'create_task'),
+            originalText: hebrewText,
+          );
+        } catch (e) {
+          if (kDebugMode) print('JSON parsing error: $e');
+          return _simpleParseHebrew(hebrewText);
+        }
       } else {
         return _simpleParseHebrew(hebrewText);
       }
     } catch (e) {
-      if (kDebugMode) print('OpenAI parsing error: $e');
+      if (kDebugMode) print('Gemini parsing error: $e');
       return _simpleParseHebrew(hebrewText);
+    }
+  }
+
+  static taskModel.TaskType _parseTypeFromIntent(String intent) {
+    switch (intent) {
+      case 'create_reminder':
+        return taskModel.TaskType.reminder;
+      case 'create_note':
+        return taskModel.TaskType.note;
+      case 'create_event':
+        return taskModel.TaskType.event;
+      default:
+        return taskModel.TaskType.task;
     }
   }
 
   static TaskParseResult _simpleParseHebrew(String text) {
     // Simple Hebrew parsing fallback
-    TaskType type = TaskType.task;
-    TaskPriority priority = TaskPriority.simple;
+    taskModel.TaskType type = taskModel.TaskType.task;
+    taskModel.TaskPriority priority = taskModel.TaskPriority.simple;
     DateTime? dueDate;
     
     // Detect task type
     if (text.contains('תזכיר') || text.contains('תזכורת')) {
-      type = TaskType.reminder;
+      type = taskModel.TaskType.reminder;
     } else if (text.contains('כתוב פתק') || text.contains('פתק')) {
-      type = TaskType.note;
+      type = taskModel.TaskType.note;
     } else if (text.contains('פגישה') || text.contains('קבע') || text.contains('מפגש')) {
-      type = TaskType.event;
+      type = taskModel.TaskType.event;
     }
     
     // Detect priority
     if (text.contains('חשוב') || text.contains('דחוף') || text.contains('חיוני')) {
-      priority = TaskPriority.important;
+      priority = taskModel.TaskPriority.important;
     } else if (text.contains('אחר כך') || text.contains('מאוחר יותר')) {
-      priority = TaskPriority.later;
+      priority = taskModel.TaskPriority.later;
     }
     
     // Simple date parsing
@@ -181,27 +228,27 @@ class VoiceService {
     );
   }
 
-  static TaskPriority _parsePriority(String priority) {
+  static taskModel.TaskPriority _parsePriority(String priority) {
     switch (priority.toLowerCase()) {
       case 'important':
-        return TaskPriority.important;
+        return taskModel.TaskPriority.important;
       case 'later':
-        return TaskPriority.later;
+        return taskModel.TaskPriority.later;
       default:
-        return TaskPriority.simple;
+        return taskModel.TaskPriority.simple;
     }
   }
 
-  static TaskType _parseType(String type) {
+  static taskModel.TaskType _parseType(String type) {
     switch (type.toLowerCase()) {
       case 'reminder':
-        return TaskType.reminder;
+        return taskModel.TaskType.reminder;
       case 'note':
-        return TaskType.note;
+        return taskModel.TaskType.note;
       case 'event':
-        return TaskType.event;
+        return taskModel.TaskType.event;
       default:
-        return TaskType.task;
+        return taskModel.TaskType.task;
     }
   }
 
@@ -222,8 +269,8 @@ class TaskParseResult {
   final String title;
   final String description;
   final DateTime? dueDate;
-  final TaskPriority priority;
-  final TaskType type;
+  final taskModel.TaskPriority priority;
+  final taskModel.TaskType type;
   final String originalText;
 
   TaskParseResult({
@@ -235,7 +282,7 @@ class TaskParseResult {
     required this.originalText,
   });
 
-  Task toTask() => Task(
+  taskModel.Task toTask() => taskModel.Task(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: title,
         description: description,

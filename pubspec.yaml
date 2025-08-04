@@ -19,6 +19,32 @@ dependencies:
   path: ^1.0.0
   firebase_core: '>=2.21.1'
   cloud_firestore: '>=5.5.0'
+  firebase_auth: ^5.2.0
+  firebase_messaging: ^15.1.0
+  uuid: ^4.0.0
+  google_generative_ai: ^0.4.0
+  # Notifications
+  flutter_local_notifications: ^17.2.1+2
+  # UI Enhancements
+  flutter_animate: ^4.5.0
+  lottie: ^3.1.2
+  shimmer: ^3.0.0
+  # Calendar
+  table_calendar: ^3.1.0
+  # Analytics & Insights
+  fl_chart: ^0.68.0
+  # Secure Storage
+  flutter_secure_storage: ^9.2.2
+  # Onboarding
+  introduction_screen: ^3.1.12
+  # Permission handling
+  permission_handler: ^11.3.1
+  # Background tasks
+  workmanager: ^0.5.2
+  # Connectivity
+  connectivity_plus: ^6.0.5
+  # Package info
+  package_info_plus: ^8.0.2
 
 dev_dependencies:
   flutter_test:
