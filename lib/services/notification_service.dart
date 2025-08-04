@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -408,9 +409,3 @@ class NotificationService {
   }
 }
 
-/// Color extension for notification colors
-extension Color on int {
-  static const Color red = Color(0xFFFF5252);
-  static const Color purple = Color(0xFF9C27B0);
-  static const Color blue = Color(0xFF2196F3);
-}
