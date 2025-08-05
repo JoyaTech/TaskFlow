@@ -80,17 +80,20 @@ class _HomePageState extends State<HomePage>
 
   Future<void> _startVoiceCapture() async {
     if (!VoiceService.isAvailable) {
-      _showMessage('קלט קולי לא זמין במכשיר זה');
+      _showMessage('🎤 קלט קולי לא זמין במכשיר זה');
       return;
     }
 
     setState(() => _isListening = true);
     _voiceAnimationController.repeat(reverse: true);
+    _showMessage('🎤 מאזין... דבר עכשיו!', backgroundColor: Colors.blue);
 
     try {
       final recognizedText = await VoiceService.startListening();
       
       if (recognizedText != null && recognizedText.isNotEmpty) {
+        _showMessage('🧠 מעבד את הטקסט: "$recognizedText"...', backgroundColor: Colors.orange);
+        
         final parseResult = await VoiceService.parseHebrewCommand(recognizedText);
         
         if (parseResult != null) {
@@ -98,15 +101,16 @@ class _HomePageState extends State<HomePage>
           await MockDatabaseService.insertTask(newTask);
           await _loadTasks();
           
-          _showMessage('משימה נוספה בהצלחה: ${newTask.title}');
+          _showVoiceSuccess(newTask, recognizedText);
         } else {
-          _showMessage('לא הצלחתי להבין את הפקודה');
+          _showMessage('❌ לא הצלחתי להבין את הפקודה. נסה שוב.', backgroundColor: Colors.red);
         }
       } else {
-        _showMessage('לא נקלט קול');
+        _showMessage('🔇 לא נקלט קול. נסה שוב ודבר בבירור.', backgroundColor: Colors.orange);
       }
     } catch (e) {
-      _showMessage('שגיאה בקלט קולי');
+      print('Voice capture error: $e');
+      _showMessage('⚠️ שגיאה בקלט קולי. בדוק הרשאות מיקרופון.', backgroundColor: Colors.red);
     } finally {
       setState(() => _isListening = false);
       _voiceAnimationController.stop();
@@ -114,14 +118,72 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String message, {Color? backgroundColor}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(message, style: const TextStyle(fontSize: 16)),
+        backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  void _showVoiceSuccess(Task newTask, String originalText) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(newTask.type.emoji, style: const TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                const Text('✅ משימה נוצרה בהצלחה!', 
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text('📝 ${newTask.title}', style: const TextStyle(fontSize: 14)),
+            if (newTask.dueDate != null) 
+              Text('📅 ${_formatDateTime(newTask.dueDate!)}', 
+                  style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            const SizedBox(height: 4),
+            Text('🎤 "$originalText"', 
+                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.white60)),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'צפה',
+          textColor: Colors.white,
+          onPressed: () => _handleTaskTap(newTask),
+        ),
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final taskDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    
+    String dateStr;
+    if (taskDate == today) {
+      dateStr = 'היום';
+    } else if (taskDate == tomorrow) {
+      dateStr = 'מחר';
+    } else {
+      dateStr = '${taskDate.day}/${taskDate.month}';
+    }
+    
+    return '$dateStr בשעה ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   void _handleTaskTap(Task task) {

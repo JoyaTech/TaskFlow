@@ -34,8 +34,8 @@ class VoiceService {
         listenMode: ListenMode.dictation,
       );
 
-      // Wait for speech to complete
-      await Future.delayed(const Duration(seconds: 5));
+      // Wait for speech to complete - longer time for better capture
+      await Future.delayed(const Duration(seconds: 8));
       await _speechToText.stop();
       _isListening = false;
 
