@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/theme.dart';
-import 'package:mindflow/services/auth_service.dart';
 import 'package:mindflow/services/notification_service.dart';
 import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/core/router.dart';
@@ -66,6 +66,11 @@ class MyApp extends ConsumerWidget {
       supportedLocales: const [
         Locale('he', 'IL'),
         Locale('en', 'US'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
     );
   }

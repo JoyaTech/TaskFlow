@@ -6,13 +6,11 @@ import 'package:mindflow/screens/onboarding_screen.dart';
 import 'package:mindflow/screens/login_screen.dart';
 import 'package:mindflow/screens/registration_screen.dart';
 import 'package:mindflow/screens/forgot_password_screen.dart';
-import 'package:mindflow/screens/onboarding_screen.dart';
 import 'package:mindflow/screens/search_screen.dart';
 import 'package:mindflow/screens/focus_timer_screen.dart';
 import 'package:mindflow/screens/analytics_screen.dart';
 import 'package:mindflow/settings_page.dart';
 import 'package:mindflow/services/auth_service.dart';
-import 'package:mindflow/screens/focus_timer_screen.dart';
 import 'package:mindflow/home_page.dart';
 import 'package:mindflow/brain_dump_page.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -224,7 +222,7 @@ class _VoiceActionButtonState extends State<VoiceActionButton>
           child: FloatingActionButton.large(
             onPressed: _toggleListening,
             backgroundColor: _isListening 
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.7)
               : Theme.of(context).colorScheme.primary,
             child: Icon(
               _isListening ? Icons.mic : Icons.mic_none,

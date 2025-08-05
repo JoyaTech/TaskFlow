@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mindflow/screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -14,19 +14,19 @@ class OnboardingScreen extends StatelessWidget {
           PageViewModel(
             title: "ברוך הבא ל-MindFlow!",
             body: "אפליקציית ניהול המשימות החכמה שלך.",
-            image: _buildImage('assets/images/onboarding1.png'),
+            image: _buildIcon(Icons.psychology, Colors.blue),
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
             title: "ניהול משימות חכם",
             body: "צרו משימות, הנה על השלמות, וכל זה בקלות.",
-            image: _buildImage('assets/images/onboarding2.png'),
+            image: _buildIcon(Icons.task_alt, Colors.green),
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
             title: "קול ותזכורות חכמות",
             body: "השתמש בזיהוי קולי ותזכורות שיזעיקו אותך בזמן.",
-            image: _buildImage('assets/images/onboarding3.png'),
+            image: _buildIcon(Icons.record_voice_over, Colors.orange),
             decoration: _getPageDecoration(),
           ),
         ],
@@ -34,9 +34,9 @@ class OnboardingScreen extends StatelessWidget {
         onDone: () async {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('onboarding_completed', true);
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
+          if (context.mounted) {
+            context.go('/auth');
+          }
         },
         next: const Icon(Icons.arrow_forward),
         showSkipButton: true,
@@ -53,9 +53,21 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String path) {
+  Widget _buildIcon(IconData icon, Color color) {
     return Align(
-      child: Image.asset(path, width: 350),
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 60,
+          color: color,
+        ),
+      ),
     );
   }
 
