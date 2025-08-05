@@ -110,13 +110,15 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('שגיאה: $e'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('שגיאה: $e'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
