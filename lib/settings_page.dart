@@ -49,11 +49,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final secureStorage = SecureStorageService();
     
     setState(() {
-      _openaiController.text = await secureStorage.getApiKey('openai') ?? '';
-      _geminiController.text = await secureStorage.getApiKey('gemini') ?? '';
-      _googleApiController.text = await secureStorage.getApiKey('google') ?? '';
-      _gmailApiController.text = await secureStorage.getApiKey('gmail') ?? '';
-      _calendarApiController.text = await secureStorage.getApiKey('calendar') ?? '';
+      _openaiController.text = await SecureStorageService.getOpenAIApiKey() ?? '';
+      _geminiController.text = await SecureStorageService.getGeminiApiKey() ?? '';
+      _googleApiController.text = await SecureStorageService.getGoogleApiKey() ?? '';
+      _gmailApiController.text = await SecureStorageService.getGmailApiKey() ?? '';
+      _calendarApiController.text = await SecureStorageService.getCalendarApiKey() ?? '';
       _voiceEnabled = prefs.getBool('voice_enabled') ?? true;
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _selectedWakeWord = prefs.getString('wake_word') ?? 'היי מטלות';
@@ -65,11 +65,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     final secureStorage = SecureStorageService();
     
-    await secureStorage.setApiKey('openai', _openaiController.text.trim());
-    await secureStorage.setApiKey('gemini', _geminiController.text.trim());
-    await secureStorage.setApiKey('google', _googleApiController.text.trim());
-    await secureStorage.setApiKey('gmail', _gmailApiController.text.trim());
-    await secureStorage.setApiKey('calendar', _calendarApiController.text.trim());
+    await SecureStorageService.storeOpenAIApiKey(_openaiController.text.trim());
+    await SecureStorageService.storeGeminiApiKey(_geminiController.text.trim());
+    await SecureStorageService.storeGoogleApiKey(_googleApiController.text.trim());
+    await SecureStorageService.storeGmailApiKey(_gmailApiController.text.trim());
+    await SecureStorageService.storeCalendarApiKey(_calendarApiController.text.trim());
     await prefs.setBool('voice_enabled', _voiceEnabled);
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setString('wake_word', _selectedWakeWord);

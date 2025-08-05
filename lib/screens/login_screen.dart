@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mindflow/services/auth_service.dart';
 import 'package:mindflow/home_page.dart';
 import 'package:mindflow/screens/registration_screen.dart';
-import 'package:mindflow/screens/forgot_password_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

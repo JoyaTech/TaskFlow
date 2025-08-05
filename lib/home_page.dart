@@ -14,12 +14,12 @@ class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  
+  bool _isListening = false;
   late TabController _tabController;
   late AnimationController _voiceAnimationController;
   late Animation<double> _voiceAnimation;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindflow/services/auth_service.dart';
-import 'package:mindflow/home_page.dart';
+import 'package:go_router/go_router.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});

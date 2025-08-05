@@ -9,7 +9,7 @@ class ValidationService {
   
   // Hebrew characters regex for proper validation
   static final RegExp _hebrewRegex = RegExp(r'[\u0590-\u05FF]');
-  static final RegExp _dangerousCharsRegex = RegExp(r'[<>"\'%;()&+=\x00-\x1f\x7f-\x9f]');
+  static final RegExp _dangerousCharsRegex = RegExp(r'[<>"\'%;()&+=`\\[\\]{}]|[\x00-\x1F]|[\x7F-\x9F]');
   static final RegExp _sqlInjectionRegex = RegExp(r'(\b(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|SELECT|UPDATE|UNION( +ALL){0,1})\b)', caseSensitive: false);
   
   /// Sanitize user input to prevent XSS and injection attacks

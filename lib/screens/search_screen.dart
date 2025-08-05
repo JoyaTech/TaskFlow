@@ -81,16 +81,16 @@ class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMix
     });
     
     try {
-    final tasks = await DatabaseService.searchTasks(query);
-    return tasks;
-        type: _selectedType,
-        priority: _selectedPriority,
-        isCompleted: _isCompleted,
-        startDate: _startDate,
-        endDate: _endDate,
-        sortBy: _sortBy,
-        descending: _descending,
-      );
+    final tasks = await ref.read(taskRepositoryProvider).searchTasks(
+      query,
+      type: _selectedType,
+      priority: _selectedPriority,
+      isCompleted: _isCompleted,
+      startDate: _startDate,
+      endDate: _endDate,
+      sortBy: _sortBy,
+      descending: _descending,
+    );
       
       setState(() {
         _searchResults = results;

@@ -58,19 +58,19 @@ final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, U
 class TaskRepository {
   final LocalDatabaseService _db = LocalDatabaseService();
   Stream<List<Task>> watchAllTasks() {
-    return _db.watchAllTasks();
+    return LocalDatabaseService.watchAllTasks();
   }
 
   Stream<List<Task>> watchTodayTasks() {
-    return _db.watchTodayTasks();
+    return LocalDatabaseService.watchTodayTasks();
   }
 
   Stream<List<Task>> watchCompletedTasks() {
-    return _db.watchCompletedTasks();
+    return LocalDatabaseService.watchCompletedTasks();
   }
 
   Stream<List<Task>> watchNotes() {
-    return _db.watchNotes();
+    return LocalDatabaseService.watchNotes();
   }
 
   Stream<TaskStatistics> watchTaskStatistics() async* {
@@ -89,18 +89,9 @@ class TaskRepository {
     });
   }
 
-  Future<int> _calculateWeeklyStreak() async {
-    // TODO: Implement streak calculation
-    return 3;
-  }
-
-  Future<Duration> _getTodayFocusTime() async {
-    // TODO: Implement focus time tracking
-    return const Duration(hours: 2, minutes: 30);
-  }
 
   Future<void> createTask(Task task) async {
-    await _db.insertTask(task);
+    await LocalDatabaseService.insertTask(task);
     // Schedule notification if task has due date
     if (task.dueDate != null) {
       await NotificationService.scheduleTaskReminder(task);
@@ -108,19 +99,19 @@ class TaskRepository {
   }
 
   Future<void> updateTask(Task task) async {
-    await _db.updateTask(task);
+    await LocalDatabaseService.updateTask(task);
   }
 
   Future<void> deleteTask(String taskId) async {
-    await _db.deleteTask(taskId);
+    await LocalDatabaseService.deleteTask(taskId);
     await NotificationService.cancelTaskNotification(taskId);
   }
 
   Future<void> completeTask(String taskId) async {
-    final task = await _db.getTaskById(taskId);
+    final task = await LocalDatabaseService.getTaskById(taskId);
     if (task != null) {
       final updatedTask = task.copyWith(isCompleted: true, completedAt: DateTime.now());
-      await _db.updateTask(updatedTask);
+      await LocalDatabaseService.updateTask(updatedTask);
       await NotificationService.showCompletionCelebration(updatedTask);
     }
   }

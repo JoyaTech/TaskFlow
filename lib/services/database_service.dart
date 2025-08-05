@@ -481,7 +481,7 @@ class DatabaseService {
       }
 
       // Build final query
-      String whereClause = conditions.isNotEmpty ? conditions.join(' AND ') : null;
+      String whereClause = conditions.isNotEmpty ? conditions.join(' AND ') : '';
       String orderByClause = '$sortBy ${descending ? 'DESC' : 'ASC'}';
 
       final List<Map<String, dynamic>> maps = await db.query(

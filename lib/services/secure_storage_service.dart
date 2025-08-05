@@ -31,6 +31,7 @@ class SecureStorageService {
   // Authentication tokens
   static const String _googleCalendarAuthKey = 'google_calendar_auth';
   static const String _userTokenKey = 'user_token';
+  static const String _taskCalendarMappingsKey = 'task_calendar_mappings';
 
   /// Store API key securely
   static Future<void> storeApiKey(String keyName, String value) async {
@@ -106,6 +107,27 @@ class SecureStorageService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error clearing Google Calendar auth: $e');
+      }
+    }
+  }
+
+  static Future<String?> getTaskCalendarMappings() async {
+    try {
+      return await _storage.read(key: _taskCalendarMappingsKey);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error reading task calendar mappings: $e');
+      }
+      return null;
+    }
+  }
+
+  static Future<void> setTaskCalendarMappings(String mappings) async {
+    try {
+      await _storage.write(key: _taskCalendarMappingsKey, value: mappings);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error writing task calendar mappings: $e');
       }
     }
   }
