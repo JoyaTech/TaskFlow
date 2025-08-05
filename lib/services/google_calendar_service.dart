@@ -377,13 +377,13 @@ class GoogleCalendarService {
 
   static Future<void> _saveTaskCalendarMapping(String taskId, String eventId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final existingMappings = prefs.getString('task_calendar_mappings') ?? '{}';
+      final secureStorage = SecureStorageService();
+      final existingMappings = await secureStorage.getTaskCalendarMappings() ?? '{}';
       final mappings = Map<String, String>.from(jsonDecode(existingMappings));
       
       mappings[taskId] = eventId;
       
-      await prefs.setString('task_calendar_mappings', jsonEncode(mappings));
+      await secureStorage.setTaskCalendarMappings(jsonEncode(mappings));
     } catch (e) {
       if (kDebugMode) print('Error saving task-calendar mapping: $e');
     }
@@ -391,8 +391,8 @@ class GoogleCalendarService {
 
   static Future<String?> getEventIdForTask(String taskId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final mappingsString = prefs.getString('task_calendar_mappings') ?? '{}';
+      final secureStorage = SecureStorageService();
+      final mappingsString = await secureStorage.getTaskCalendarMappings() ?? '{}';
       final mappings = Map<String, String>.from(jsonDecode(mappingsString));
       
       return mappings[taskId];

@@ -41,7 +41,7 @@ class AuthService {
       throw _handleAuthException(e);
     } catch (e) {
       if (kDebugMode) print('Unexpected sign in error: $e');
-      throw Exception('שגיאה בהתחברות: $e');
+      throw AuthException('שגיאה בהתחברות: $e');
     }
   }
 
@@ -71,7 +71,7 @@ class AuthService {
       throw _handleAuthException(e);
     } catch (e) {
       if (kDebugMode) print('Unexpected sign up error: $e');
-      throw Exception('שגיאה ברישום: $e');
+      throw AuthException('שגיאה ברישום: $e');
     }
   }
 
@@ -90,7 +90,7 @@ class AuthService {
       await _auth.signOut();
     } catch (e) {
       if (kDebugMode) print('Sign out error: $e');
-      throw Exception('שגיאה ביציאה: $e');
+      throw AuthException('שגיאה ביציאה: $e');
     }
   }
 
@@ -130,7 +130,7 @@ class AuthService {
       throw _handleAuthException(e);
     } catch (e) {
       if (kDebugMode) print('Unexpected Google sign in error: $e');
-      throw Exception('שגיאה בהתחברות עם גוגל: $e');
+      throw AuthException('שגיאה בהתחברות עם גוגל: $e');
     }
   }
 
@@ -147,7 +147,7 @@ class AuthService {
       }
     } catch (e) {
       if (kDebugMode) print('Delete account error: $e');
-      throw Exception('שגיאה במחיקת החשבון: $e');
+      throw AuthException('שגיאה במחיקת החשבון: $e');
     }
   }
 
@@ -240,31 +240,31 @@ class AuthService {
       await _firestore.collection('users').doc(uid).update(data);
     } catch (e) {
       if (kDebugMode) print('Error updating user profile: $e');
-      throw Exception('שגיאה בעדכון פרופיל: $e');
+      throw AuthException('שגיאה בעדכון פרופיל: $e');
     }
   }
 
   /// Handle Firebase Auth exceptions
-  static Exception _handleAuthException(FirebaseAuthException e) {
+  static AuthException _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return Exception('המשתמש לא נמצא');
+        return AuthException('המשתמש לא נמצא');
       case 'wrong-password':
-        return Exception('סיסמה שגויה');
+        return AuthException('סיסמה שגויה');
       case 'email-already-in-use':
-        return Exception('כתובת האימייל כבר בשימוש');
+        return AuthException('כתובת האימייל כבר בשימוש');
       case 'weak-password':
-        return Exception('הסיסמה חלשה מדי');
+        return AuthException('הסיסמה חלשה מדי');
       case 'invalid-email':
-        return Exception('כתובת אימייל לא תקינה');
+        return AuthException('כתובת אימייל לא תקינה');
       case 'user-disabled':
-        return Exception('החשבון הושבת');
+        return AuthException('החשבון הושבת');
       case 'too-many-requests':
-        return Exception('יותר מדי נסיונות. נסה שוב מאוחר יותר');
+        return AuthException('יותר מדי נסיונות. נסה שוב מאוחר יותר');
       case 'network-request-failed':
-        return Exception('בעיה בחיבור לאינטרנט');
+        return AuthException('בעיה בחיבור לאינטרנט');
       default:
-        return Exception('שגיאה: ${e.message}');
+        return AuthException('שגיאה: ${e.message}');
     }
   }
 
@@ -307,4 +307,14 @@ class AuthService {
         return 'חלשה';
     }
   }
+}
+
+/// Custom exception for authentication errors.
+class AuthException implements Exception {
+  final String message;
+
+  AuthException(this.message);
+
+  @override
+  String toString() => message;
 }

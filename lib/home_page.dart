@@ -10,20 +10,15 @@ import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
 import 'package:mindflow/widgets/calendar_widget.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
+class _HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  List<Task> _tasks = [];
-  List<Task> _todayTasks = [];
-  bool _isLoading = true;
-  bool _isListening = false;
-  int _completedTasksToday = 0;
   
   late TabController _tabController;
   late AnimationController _voiceAnimationController;
@@ -57,29 +52,8 @@ class _HomePageState extends State<HomePage>
   Future<void> _initializeApp() async {
     await VoiceService.initialize();
     await GoogleCalendarService.initialize();
-    await _loadTasks();
-    
-    // Initialize sample data if empty
-    if (_tasks.isEmpty) {
-      await DatabaseService.initSampleData();
-      await _loadTasks();
-    }
   }
 
-  Future<void> _loadTasks() async {
-    final tasks = await DatabaseService.getAllTasks();
-    final todayTasks = await DatabaseService.getTodayTasks();
-    final completedToday = await DatabaseService.getTodayCompletedTasksCount();
-    
-    if (mounted) {
-      setState(() {
-        _tasks = tasks;
-        _todayTasks = todayTasks;
-        _completedTasksToday = completedToday;
-        _isLoading = false;
-      });
-    }
-  }
 
   Future<void> _startVoiceCapture() async {
     if (!VoiceService.isAvailable) {
@@ -101,7 +75,7 @@ class _HomePageState extends State<HomePage>
         
         if (parseResult != null) {
           final newTask = parseResult.toTask();
-          await DatabaseService.insertTask(newTask);
+          await ref.read(taskRepositoryProvider).createTask(newTask);
           
           // Auto-sync to Google Calendar if connected and it's an event or important task
           bool calendarSynced = false;
@@ -114,7 +88,6 @@ class _HomePageState extends State<HomePage>
             }
           }
           
-          await _loadTasks();
           _showVoiceSuccess(newTask, recognizedText, calendarSynced: calendarSynced);
         } else {
           _showMessage('❌ לא הצלחתי להבין את הפקודה. נסה שוב.', backgroundColor: Colors.red);
@@ -209,12 +182,12 @@ class _HomePageState extends State<HomePage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => TaskDetailSheet(task: task, onUpdate: _loadTasks),
+      builder: (context) => TaskDetailSheet(task: task, onUpdate: () => ref.refresh(allTasksProvider)),
     );
   }
 
   void _handleTaskCompleted(Task task) {
-    _loadTasks();
+    ref.read(taskRepositoryProvider).completeTask(task.id);
   }
 
   void _showManualTaskDialog() {
@@ -222,7 +195,7 @@ class _HomePageState extends State<HomePage>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ManualTaskSheet(onTaskCreated: _loadTasks),
+      builder: (context) => ManualTaskSheet(onTaskCreated: () => ref.refresh(allTasksProvider)),
     );
   }
 
@@ -438,9 +411,8 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _buildProgressSection() {
-    final totalTasks = _todayTasks.length;
-    final completedTasks = _completedTasksToday;
-    final progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
+    final allTasks = ref.watch(allTasksProvider);
+    final todayTasks = ref.watch(todayTasksProvider);
     
     return Container(
       margin: const EdgeInsets.all(16),
@@ -466,7 +438,15 @@ class _HomePageState extends State<HomePage>
                 width: 60,
                 height: 60,
                 child: CircularProgressIndicator(
-                  value: progress,
+                  value: todayTasks.when(
+                    data: (data) {
+                      final total = data.length;
+                      final completed = data.where((t) => t.isCompleted).length;
+                      return total > 0 ? completed / total : 0.0;
+                    },
+                    loading: () => 0.0,
+                    error: (_, __) => 0.0,
+                  ),
                   strokeWidth: 6,
                   backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -498,11 +478,15 @@ class _HomePageState extends State<HomePage>
                       ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '$completedTasks מתוך $totalTasks משימות הושלמו',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                todayTasks.when(
+                  data: (data) => Text(
+                    '${data.where((t) => t.isCompleted).length} מתוך ${data.length} משימות הושלמו',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                  ),
+                  loading: () => const Text('טוען נתונים...'),
+                  error: (err, stack) => Text('שגיאה: $err'),
                 ),
               ],
             ),
@@ -517,67 +501,71 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _buildTodayView() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final todayTasks = ref.watch(todayTasksProvider);
     
-    return TaskListWidget(
-      tasks: _todayTasks,
-      onTaskTap: _handleTaskTap,
-      onTaskCompleted: _handleTaskCompleted,
+    return todayTasks.when(
+      data: (tasks) => TaskListWidget(
+        tasks: tasks,
+        onTaskTap: _handleTaskTap,
+        onTaskCompleted: _handleTaskCompleted,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('שגיאה: $err')),
     );
   }
 
   Widget _buildAllTasksView() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final allTasks = ref.watch(allTasksProvider);
     
-    final activeTasks = _tasks.where((task) => !task.isCompleted).toList();
-    
-    return TaskListWidget(
-      tasks: activeTasks,
-      onTaskTap: _handleTaskTap,
-      onTaskCompleted: _handleTaskCompleted,
+    return allTasks.when(
+      data: (tasks) {
+        final activeTasks = tasks.where((task) => !task.isCompleted).toList();
+        return TaskListWidget(
+          tasks: activeTasks,
+          onTaskTap: _handleTaskTap,
+          onTaskCompleted: _handleTaskCompleted,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('שגיאה: $err')),
     );
   }
 
   Widget _buildCompletedView() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final completedTasks = ref.watch(completedTasksProvider);
     
-    final completedTasks = _tasks.where((task) => task.isCompleted).toList();
-    
-    return TaskListWidget(
-      tasks: completedTasks,
-      onTaskTap: _handleTaskTap,
-      onTaskCompleted: _handleTaskCompleted,
+    return completedTasks.when(
+      data: (tasks) => TaskListWidget(
+        tasks: tasks,
+        onTaskTap: _handleTaskTap,
+        onTaskCompleted: _handleTaskCompleted,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('שגיאה: $err')),
     );
   }
 
   Widget _buildNotesView() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final notes = ref.watch(notesProvider);
     
-    final notes = _tasks.where((task) => task.type == TaskType.note).toList();
-    
-    return TaskListWidget(
-      tasks: notes,
-      onTaskTap: _handleTaskTap,
-      onTaskCompleted: _handleTaskCompleted,
-      showDate: false,
+    return notes.when(
+      data: (tasks) => TaskListWidget(
+        tasks: tasks,
+        onTaskTap: _handleTaskTap,
+        onTaskCompleted: _handleTaskCompleted,
+        showDate: false,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('שגיאה: $err')),
     );
   }
 
   Widget _buildCalendarView() {
     return GoogleCalendarService.isAuthenticated
         ? CalendarWidget(
-            tasks: _tasks,
             onTaskTap: _handleTaskTap,
             onTaskCompleted: _handleTaskCompleted,
-            onRefresh: _loadTasks,
+            onRefresh: () => ref.refresh(allTasksProvider),
           )
         : Center(
             child: Padding(

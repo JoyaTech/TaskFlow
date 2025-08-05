@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mindflow/services/secure_storage_service.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -46,13 +46,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final secureStorage = SecureStorageService();
     
     setState(() {
-      _openaiController.text = prefs.getString('openai_api_key') ?? '';
-      _geminiController.text = prefs.getString('gemini_api_key') ?? '';
-      _googleApiController.text = prefs.getString('google_api_key') ?? '';
-      _gmailApiController.text = prefs.getString('gmail_api_key') ?? '';
-      _calendarApiController.text = prefs.getString('calendar_api_key') ?? '';
+      _openaiController.text = await secureStorage.getApiKey('openai') ?? '';
+      _geminiController.text = await secureStorage.getApiKey('gemini') ?? '';
+      _googleApiController.text = await secureStorage.getApiKey('google') ?? '';
+      _gmailApiController.text = await secureStorage.getApiKey('gmail') ?? '';
+      _calendarApiController.text = await secureStorage.getApiKey('calendar') ?? '';
       _voiceEnabled = prefs.getBool('voice_enabled') ?? true;
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _selectedWakeWord = prefs.getString('wake_word') ?? 'היי מטלות';
@@ -62,12 +63,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final secureStorage = SecureStorageService();
     
-    await prefs.setString('openai_api_key', _openaiController.text.trim());
-    await prefs.setString('gemini_api_key', _geminiController.text.trim());
-    await prefs.setString('google_api_key', _googleApiController.text.trim());
-    await prefs.setString('gmail_api_key', _gmailApiController.text.trim());
-    await prefs.setString('calendar_api_key', _calendarApiController.text.trim());
+    await secureStorage.setApiKey('openai', _openaiController.text.trim());
+    await secureStorage.setApiKey('gemini', _geminiController.text.trim());
+    await secureStorage.setApiKey('google', _googleApiController.text.trim());
+    await secureStorage.setApiKey('gmail', _gmailApiController.text.trim());
+    await secureStorage.setApiKey('calendar', _calendarApiController.text.trim());
     await prefs.setBool('voice_enabled', _voiceEnabled);
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setString('wake_word', _selectedWakeWord);

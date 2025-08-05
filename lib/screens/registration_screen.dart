@@ -188,12 +188,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       );
       
       // Navigate to home page
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomePage()),
-        );
-      }
-    } catch (e) {
+      if (mounted) context.go('/home');
+    } on AuthException catch (e) {
       _showError(e.toString());
     } finally {
       if (mounted) {
