@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/theme.dart';
 import 'package:mindflow/services/notification_service.dart';
-import 'package:mindflow/services/mock_database_service.dart';
+import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/core/router.dart';
 import 'package:mindflow/demo_app.dart';
 import 'firebase_options.dart';
@@ -35,8 +35,8 @@ void main() async {
 /// Initialize all app services
 Future<void> _initializeServices() async {
   try {
-    // Initialize mock database
-    await MockDatabaseService.initialize();
+    // 🗄️ PRODUCTION FIX: Initialize SQLite database service
+    await DatabaseService.initialize();
     
     // Initialize notifications
     await NotificationService.initialize();
@@ -44,6 +44,7 @@ Future<void> _initializeServices() async {
     print('✅ All services initialized successfully');
   } catch (e) {
     print('❌ Error initializing services: $e');
+    rethrow; // Re-throw to prevent app from starting with broken database
   }
 }
 

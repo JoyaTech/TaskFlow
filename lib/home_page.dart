@@ -6,7 +6,7 @@ import 'package:mindflow/voice_service.dart';
 import 'package:mindflow/task_list_widget.dart';
 import 'package:mindflow/brain_dump_page.dart';
 import 'package:mindflow/settings_page.dart';
-import 'package:mindflow/services/mock_database_service.dart';
+import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
 import 'package:mindflow/widgets/calendar_widget.dart';
 
@@ -61,15 +61,15 @@ class _HomePageState extends State<HomePage>
     
     // Initialize sample data if empty
     if (_tasks.isEmpty) {
-      await MockDatabaseService.initSampleData();
+      await DatabaseService.initSampleData();
       await _loadTasks();
     }
   }
 
   Future<void> _loadTasks() async {
-    final tasks = await MockDatabaseService.getAllTasks();
-    final todayTasks = await MockDatabaseService.getTodayTasks();
-    final completedToday = await MockDatabaseService.getTodayCompletedTasksCount();
+    final tasks = await DatabaseService.getAllTasks();
+    final todayTasks = await DatabaseService.getTodayTasks();
+    final completedToday = await DatabaseService.getTodayCompletedTasksCount();
     
     if (mounted) {
       setState(() {
@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage>
         
         if (parseResult != null) {
           final newTask = parseResult.toTask();
-          await MockDatabaseService.insertTask(newTask);
+          await DatabaseService.insertTask(newTask);
           
           // Auto-sync to Google Calendar if connected and it's an event or important task
           bool calendarSynced = false;
@@ -724,7 +724,7 @@ class _ManualTaskSheetState extends State<ManualTaskSheet> {
       createdAt: DateTime.now(),
     );
 
-    await MockDatabaseService.insertTask(task);
+    await DatabaseService.insertTask(task);
     widget.onTaskCreated();
     
     if (mounted) {
@@ -1041,7 +1041,7 @@ class TaskDetailSheet extends StatelessWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () async {
-                      await MockDatabaseService.markTaskCompleted(task.id);
+                      await DatabaseService.markTaskCompleted(task.id);
                       onUpdate();
                       if (context.mounted) Navigator.pop(context);
                     },
@@ -1053,7 +1053,7 @@ class TaskDetailSheet extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    await MockDatabaseService.deleteTask(task.id);
+                    await DatabaseService.deleteTask(task.id);
                     onUpdate();
                     if (context.mounted) Navigator.pop(context);
                   },

@@ -81,8 +81,8 @@ class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMix
     });
     
     try {
-      final results = await MockDatabaseService.searchAndFilterTasks(
-        query: query,
+    final tasks = await DatabaseService.searchTasks(query);
+    return tasks;
         type: _selectedType,
         priority: _selectedPriority,
         isCompleted: _isCompleted,
