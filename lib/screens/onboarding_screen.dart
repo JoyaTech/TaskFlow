@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import '../widgets/custom_graphics.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -18,15 +19,15 @@ class OnboardingScreen extends StatelessWidget {
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
-            title: "ניהול משימות חכם",
-            body: "צרו משימות, הנה על השלמות, וכל זה בקלות.",
-            image: _buildIcon(Icons.task_alt, Colors.green),
+            title: "פירוק משימות מורכבות",
+            body: "הפרד משימות גדולות לקטנות ופשוטות.",
+            image: FocusFlowGraphics.taskBreakdownIllustration(),
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
-            title: "קול ותזכורות חכמות",
-            body: "השתמש בזיהוי קולי ותזכורות שיזעיקו אותך בזמן.",
-            image: _buildIcon(Icons.record_voice_over, Colors.orange),
+            title: "קלט קולי חכם",
+            body: "המר את המחשבות שלך למשימות מסודרות.",
+            image: FocusFlowGraphics.voiceWaveIllustration(),
             decoration: _getPageDecoration(),
           ),
         ],

@@ -7,6 +7,7 @@ import 'package:mindflow/task_list_widget.dart';
 import 'package:mindflow/brain_dump_page.dart';
 import 'package:mindflow/settings_page.dart';
 import 'package:mindflow/services/mock_database_service.dart';
+import 'package:mindflow/services/google_calendar_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -54,6 +55,7 @@ class _HomePageState extends State<HomePage>
 
   Future<void> _initializeApp() async {
     await VoiceService.initialize();
+    await GoogleCalendarService.initialize();
     await _loadTasks();
     
     // Initialize sample data if empty
@@ -99,9 +101,20 @@ class _HomePageState extends State<HomePage>
         if (parseResult != null) {
           final newTask = parseResult.toTask();
           await MockDatabaseService.insertTask(newTask);
-          await _loadTasks();
           
-          _showVoiceSuccess(newTask, recognizedText);
+          // Auto-sync to Google Calendar if connected and it's an event or important task
+          bool calendarSynced = false;
+          if (GoogleCalendarService.isAuthenticated && 
+              (newTask.type == TaskType.event || newTask.priority == TaskPriority.important)) {
+            try {
+              calendarSynced = await GoogleCalendarService.createEventFromTask(newTask);
+            } catch (e) {
+              print('Calendar sync failed: $e');
+            }
+          }
+          
+          await _loadTasks();
+          _showVoiceSuccess(newTask, recognizedText, calendarSynced: calendarSynced);
         } else {
           _showMessage('❌ לא הצלחתי להבין את הפקודה. נסה שוב.', backgroundColor: Colors.red);
         }
@@ -130,7 +143,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  void _showVoiceSuccess(Task newTask, String originalText) {
+  void _showVoiceSuccess(Task newTask, String originalText, {bool calendarSynced = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Column(
@@ -150,6 +163,9 @@ class _HomePageState extends State<HomePage>
             if (newTask.dueDate != null) 
               Text('📅 ${_formatDateTime(newTask.dueDate!)}', 
                   style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            if (calendarSynced)
+              const Text('📅 נוסף ליומן Google', 
+                  style: TextStyle(fontSize: 12, color: Colors.white70)),
             const SizedBox(height: 4),
             Text('🎤 "$originalText"', 
                 style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.white60)),

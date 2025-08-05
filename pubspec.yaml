@@ -51,6 +51,10 @@ dependencies:
   connectivity_plus: ^6.0.5
   # Package info
   package_info_plus: ^8.0.2
+  # Google APIs
+  googleapis: ^13.1.0
+  googleapis_auth: ^1.6.0
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

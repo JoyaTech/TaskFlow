@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mindflow/services/google_calendar_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -162,6 +163,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   // Voice Settings Section
                   _buildSectionHeader('הגדרות קול', Icons.mic),
                   _buildVoiceSettingsCard(),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Google Calendar Integration Section
+                  _buildSectionHeader('יומן Google', Icons.calendar_today),
+                  _buildCalendarIntegrationCard(),
                   
                   const SizedBox(height: 24),
                   
@@ -395,6 +402,146 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildCalendarIntegrationCard() {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'חיבור ליומן Google',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        GoogleCalendarService.isAuthenticated
+                            ? '✅ מחובר ופעיל - אירועים ומשימות חשובות מסונכרנים אוטומטית'
+                            : 'התחבר כדי לסנכרן אירועים ומשימות חשובות עם היומן שלך',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: GoogleCalendarService.isAuthenticated
+                              ? Colors.green
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 20),
+            
+            if (!GoogleCalendarService.isAuthenticated) ...[
+              Text(
+                'יתרונות החיבור ליומן Google:',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem('📅 סנכרון אוטומטי של אירועים ופגישות'),
+              _buildBenefitItem('⭐ משימות חשובות מועברות ליומן עם התראות'),
+              _buildBenefitItem('🎤 פקודות קול יוצרות אירועים ישירות ביומן'),
+              _buildBenefitItem('🔄 עדכונים דו-כיווניים - שינויים מסתנכרנים'),
+              
+              const SizedBox(height: 20),
+            ],
+            
+            SizedBox(
+              width: double.infinity,
+              child: GoogleCalendarService.isAuthenticated
+                  ? OutlinedButton.icon(
+                      onPressed: _disconnectFromGoogleCalendar,
+                      icon: const Icon(Icons.logout),
+                      label: const Text('התנתק מיומן Google'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        side: BorderSide(color: Theme.of(context).colorScheme.error),
+                      ),
+                    )
+                  : FilledButton.icon(
+                      onPressed: _connectToGoogleCalendar,
+                      icon: const Icon(Icons.account_circle, color: Colors.white),
+                      label: const Text(
+                        'התחבר ליומן Google',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildBenefitItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Future<void> _connectToGoogleCalendar() async {
+    _showMessage('מתחבר ליומן Google...');
+    
+    try {
+      final success = await GoogleCalendarService.signIn();
+      
+      if (success) {
+        setState(() {});
+        _showMessage('✅ התחברת בהצלחה ליומן Google! אירועים ומשימות חשובות יסונכרנו אוטומטית.');
+      } else {
+        _showMessage('❌ החיבור ליומן Google נכשל. נסה שוב.');
+      }
+    } catch (e) {
+      _showMessage('⚠️ שגיאה בחיבור ליומן Google: ${e.toString()}');
+    }
+  }
+  
+  Future<void> _disconnectFromGoogleCalendar() async {
+    try {
+      await GoogleCalendarService.signOut();
+      setState(() {});
+      _showMessage('התנתקת מיומן Google בהצלחה');
+    } catch (e) {
+      _showMessage('שגיאה בהתנתקות מיומן Google: ${e.toString()}');
+    }
   }
 
   Widget _buildAppSettingsCard() {

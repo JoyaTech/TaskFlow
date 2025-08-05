@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/task_model.dart';
 import 'package:mindflow/providers/task_providers.dart';
 import 'package:mindflow/services/mock_database_service.dart';
+import 'package:mindflow/widgets/custom_graphics.dart';
 import 'package:intl/intl.dart';
 
 class TaskListWidget extends StatefulWidget {
@@ -49,29 +50,26 @@ class _TaskListWidgetState extends State<TaskListWidget>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.task_alt,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
+            FocusFlowGraphics.allDoneIllustration(size: 100),
+            const SizedBox(height: 24),
             Text(
-              'אין משימות כרגע',
+              'סיימת הכל! כל הכבוד 🎉',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withValues(alpha: 0.6),
+                        .withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'לחץ על הכפתור הכחול למטה כדי להוסיף משימה',
+              'הגיע הזמן לנוח וליהנות\nאו להוסיף משימות חדשות',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withValues(alpha: 0.5),
+                        .withValues(alpha: 0.6),
                   ),
               textAlign: TextAlign.center,
             ),

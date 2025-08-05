@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mindflow/task_model.dart' as taskModel;
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:mindflow/services/google_calendar_service.dart';
 
 class VoiceService {
   static final SpeechToText _speechToText = SpeechToText();
@@ -292,4 +293,24 @@ class TaskParseResult {
         createdAt: DateTime.now(),
         voiceNote: originalText,
       );
+
+  /// Create task and optionally sync to Google Calendar
+  Future<taskModel.Task?> createTaskWithCalendarSync() async {
+    final task = toTask();
+    
+    // Auto-sync events and important tasks to Google Calendar if connected
+    if (GoogleCalendarService.isAuthenticated && 
+        (type == taskModel.TaskType.event || priority == taskModel.TaskPriority.important)) {
+      try {
+        final success = await GoogleCalendarService.createEventFromTask(task);
+        if (success && kDebugMode) {
+          print('Task synced to Google Calendar: ${task.title}');
+        }
+      } catch (e) {
+        if (kDebugMode) print('Calendar sync failed: $e');
+      }
+    }
+    
+    return task;
+  }
 }
