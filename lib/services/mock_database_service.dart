@@ -211,3 +211,4 @@ class MockDatabaseService {
 
     return results;
   }
+}
