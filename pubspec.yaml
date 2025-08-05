@@ -1,5 +1,5 @@
-name: mindflow
-description: "Hebrew-first task management and voice assistant app for users with ADHD"
+name: focusflow
+description: "FocusFlow - Hebrew-first task management and voice assistant app for users with ADHD"
 publish_to: "none"
 version: 1.0.0
 
@@ -59,3 +59,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - logo.jpg
+    - Icon.jpg
+    - favicon.jpg
+    - welcome.jpeg

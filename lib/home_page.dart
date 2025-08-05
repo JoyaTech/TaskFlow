@@ -303,27 +303,67 @@ class _HomePageState extends State<HomePage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _getGreeting(),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
+              // App logo
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/Icon.jpg',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.psychology,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 24,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'FocusFlow',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'מה נרצה להשיג היום?',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer
-                              .withValues(alpha: 0.8),
+                        const SizedBox(width: 8),
+                        Text(
+                          _getGreeting(),
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'מה נרצה להשיג היום?',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer
+                                .withValues(alpha: 0.8),
+                          ),
+                    ),
+                  ],
+                ),
               ),
               IconButton(
                 onPressed: () {

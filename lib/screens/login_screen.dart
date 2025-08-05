@@ -12,19 +12,49 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController(text: 'Gal@joya-tech.net');
+  final TextEditingController _passwordController = TextEditingController(text: 'Hpvd2k');
   bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('התחברות ל-MindFlow')),
+      appBar: AppBar(title: const Text('התחברות ל-FocusFlow')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // FocusFlow Logo
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 32),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/logo.jpg',
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.psychology,
+                          size: 60,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'אימייל'),

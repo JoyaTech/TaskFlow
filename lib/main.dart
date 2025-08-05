@@ -55,7 +55,7 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     
     return MaterialApp.router(
-      title: 'TaskFlow - עוזר המשימות החכם',
+      title: 'FocusFlow - עוזר המשימות החכם',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,

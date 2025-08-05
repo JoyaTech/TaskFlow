@@ -12,9 +12,9 @@ class OnboardingScreen extends StatelessWidget {
       body: IntroductionScreen(
         pages: [
           PageViewModel(
-            title: "ברוך הבא ל-MindFlow!",
+            title: "ברוך הבא ל-FocusFlow!",
             body: "אפליקציית ניהול המשימות החכמה שלך.",
-            image: _buildIcon(Icons.psychology, Colors.blue),
+            image: _buildWelcomeImage(),
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
@@ -48,6 +48,23 @@ class OnboardingScreen extends StatelessWidget {
           activeShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeImage() {
+    return Align(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/images/welcome.jpeg',
+          width: 200,
+          height: 200,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildIcon(Icons.psychology, Colors.blue);
+          },
         ),
       ),
     );
