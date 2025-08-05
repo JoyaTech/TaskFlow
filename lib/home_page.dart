@@ -8,6 +8,7 @@ import 'package:mindflow/brain_dump_page.dart';
 import 'package:mindflow/settings_page.dart';
 import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
+import 'package:mindflow/widgets/calendar_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     
     _voiceAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -245,6 +246,7 @@ class _HomePageState extends State<HomePage>
                 _buildAllTasksView(),
                 _buildCompletedView(),
                 _buildNotesView(),
+                _buildCalendarView(),
               ],
             ),
           ),
@@ -426,6 +428,7 @@ class _HomePageState extends State<HomePage>
                 Tab(text: 'הכל'),
                 Tab(text: 'הושלמו'),
                 Tab(text: 'פתקים'),
+                Tab(text: 'יומן'),
               ],
             ),
           ),
@@ -566,6 +569,68 @@ class _HomePageState extends State<HomePage>
       onTaskCompleted: _handleTaskCompleted,
       showDate: false,
     );
+  }
+
+  Widget _buildCalendarView() {
+    return GoogleCalendarService.isAuthenticated
+        ? CalendarWidget(
+            tasks: _tasks,
+            onTaskTap: _handleTaskTap,
+            onTaskCompleted: _handleTaskCompleted,
+            onRefresh: _loadTasks,
+          )
+        : Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'יומן Google לא מחובר',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'חבר את יומן Google שלך כדי לראות ולסנכרן את האירועים והמשימות החשובות',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      // Navigate to settings page to connect Google Calendar
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsPage()),
+                      );
+                      // Refresh the view if calendar was connected
+                      if (result == true && mounted) {
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(Icons.link, color: Colors.white),
+                    label: const Text('חבר יומן Google', style: TextStyle(color: Colors.white)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
   }
 
   String _getGreeting() {
