@@ -4,12 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/theme.dart';
 import 'package:mindflow/services/auth_service.dart';
 import 'package:mindflow/services/notification_service.dart';
-import 'package:mindflow/services/local_database_service.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/core/router.dart';
+import 'package:mindflow/demo_app.dart';
 import 'firebase_options.dart';
+
+// Set to true to run the demo version
+const bool kUseDemo = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  if (kUseDemo) {
+    // Run the demo version without Firebase dependencies
+    runApp(const DemoApp());
+    return;
+  }
   
   // Initialize Firebase
   await Firebase.initializeApp(
@@ -25,8 +35,8 @@ void main() async {
 /// Initialize all app services
 Future<void> _initializeServices() async {
   try {
-    // Initialize local database
-    await LocalDatabaseService.database;
+    // Initialize mock database
+    await MockDatabaseService.initialize();
     
     // Initialize notifications
     await NotificationService.initialize();

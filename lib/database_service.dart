@@ -117,6 +117,18 @@ class DatabaseService {
     }
   }
 
+  static Future<Task?> getTaskById(String id) async {
+    try {
+      final doc = await _tasksCollection.doc(id).get();
+      if (doc.exists) {
+        return Task.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get task by id: $e');
+    }
+  }
+
   static Future<int> getCompletedTasksCount() async {
     try {
       final querySnapshot = await _tasksCollection

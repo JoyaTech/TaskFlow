@@ -6,6 +6,7 @@ import 'package:mindflow/voice_service.dart';
 import 'package:mindflow/task_list_widget.dart';
 import 'package:mindflow/brain_dump_page.dart';
 import 'package:mindflow/settings_page.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -57,15 +58,15 @@ class _HomePageState extends State<HomePage>
     
     // Initialize sample data if empty
     if (_tasks.isEmpty) {
-      await DatabaseService.initSampleData();
+      await MockDatabaseService.initSampleData();
       await _loadTasks();
     }
   }
 
   Future<void> _loadTasks() async {
-    final tasks = await DatabaseService.getAllTasks();
-    final todayTasks = await DatabaseService.getTodayTasks();
-    final completedToday = await DatabaseService.getTodayCompletedTasksCount();
+    final tasks = await MockDatabaseService.getAllTasks();
+    final todayTasks = await MockDatabaseService.getTodayTasks();
+    final completedToday = await MockDatabaseService.getTodayCompletedTasksCount();
     
     if (mounted) {
       setState(() {
@@ -94,7 +95,7 @@ class _HomePageState extends State<HomePage>
         
         if (parseResult != null) {
           final newTask = parseResult.toTask();
-          await DatabaseService.insertTask(newTask);
+          await MockDatabaseService.insertTask(newTask);
           await _loadTasks();
           
           _showMessage('משימה נוספה בהצלחה: ${newTask.title}');
@@ -540,7 +541,7 @@ class _ManualTaskSheetState extends State<ManualTaskSheet> {
       createdAt: DateTime.now(),
     );
 
-    await DatabaseService.insertTask(task);
+    await MockDatabaseService.insertTask(task);
     widget.onTaskCreated();
     
     if (mounted) {
@@ -857,7 +858,7 @@ class TaskDetailSheet extends StatelessWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () async {
-                      await DatabaseService.markTaskCompleted(task.id);
+                      await MockDatabaseService.markTaskCompleted(task.id);
                       onUpdate();
                       if (context.mounted) Navigator.pop(context);
                     },
@@ -869,7 +870,7 @@ class TaskDetailSheet extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    await DatabaseService.deleteTask(task.id);
+                    await MockDatabaseService.deleteTask(task.id);
                     onUpdate();
                     if (context.mounted) Navigator.pop(context);
                   },

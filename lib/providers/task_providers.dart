@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/task_model.dart';
-import 'package:mindflow/database_service.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/services/notification_service.dart';
 
 // Task repository provider
@@ -58,21 +58,21 @@ final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, U
 class TaskRepository {
   Stream<List<Task>> watchAllTasks() async* {
     while (true) {
-      yield await DatabaseService.getAllTasks();
+      yield await MockDatabaseService.getAllTasks();
       await Future.delayed(const Duration(seconds: 1));
     }
   }
 
   Stream<List<Task>> watchTodayTasks() async* {
     while (true) {
-      yield await DatabaseService.getTodayTasks();
+      yield await MockDatabaseService.getTodayTasks();
       await Future.delayed(const Duration(seconds: 1));
     }
   }
 
   Stream<List<Task>> watchCompletedTasks() async* {
     while (true) {
-      final tasks = await DatabaseService.getAllTasks();
+      final tasks = await MockDatabaseService.getAllTasks();
       yield tasks.where((task) => task.isCompleted).toList();
       await Future.delayed(const Duration(seconds: 1));
     }
@@ -80,7 +80,7 @@ class TaskRepository {
 
   Stream<List<Task>> watchNotes() async* {
     while (true) {
-      final tasks = await DatabaseService.getAllTasks();
+      final tasks = await MockDatabaseService.getAllTasks();
       yield tasks.where((task) => task.type == TaskType.note).toList();
       await Future.delayed(const Duration(seconds: 1));
     }
@@ -88,9 +88,9 @@ class TaskRepository {
 
   Stream<TaskStatistics> watchTaskStatistics() async* {
     while (true) {
-      final allTasks = await DatabaseService.getAllTasks();
-      final todayTasks = await DatabaseService.getTodayTasks();
-      final completedToday = await DatabaseService.getTodayCompletedTasksCount();
+      final allTasks = await MockDatabaseService.getAllTasks();
+      final todayTasks = await MockDatabaseService.getTodayTasks();
+      final completedToday = await MockDatabaseService.getTodayCompletedTasksCount();
       
       yield TaskStatistics(
         totalTasks: allTasks.length,
@@ -115,7 +115,7 @@ class TaskRepository {
   }
 
   Future<void> createTask(Task task) async {
-    await DatabaseService.insertTask(task);
+    await MockDatabaseService.insertTask(task);
     // Schedule notification if task has due date
     if (task.dueDate != null) {
       await NotificationService.scheduleTaskReminder(task);
@@ -123,17 +123,17 @@ class TaskRepository {
   }
 
   Future<void> updateTask(Task task) async {
-    await DatabaseService.updateTask(task);
+    await MockDatabaseService.updateTask(task);
   }
 
   Future<void> deleteTask(String taskId) async {
-    await DatabaseService.deleteTask(taskId);
+    await MockDatabaseService.deleteTask(taskId);
     await NotificationService.cancelTaskNotification(taskId);
   }
 
   Future<void> completeTask(String taskId) async {
-    await DatabaseService.markTaskCompleted(taskId);
-    final task = await DatabaseService.getTaskById(taskId);
+    await MockDatabaseService.markTaskCompleted(taskId);
+    final task = await MockDatabaseService.getTaskById(taskId);
     if (task != null) {
       await NotificationService.showCompletionCelebration(task);
     }
