@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -90,6 +91,46 @@ class AuthService {
     } catch (e) {
       if (kDebugMode) print('Sign out error: $e');
       throw Exception('שגיאה ביציאה: $e');
+    }
+  }
+
+  /// Sign in with Google
+  static Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // The user canceled the sign-in
+        return null;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        final user = userCredential.user!;
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+          // If the user is new, create a profile
+          await _createUserProfile(user, user.displayName ?? 'משתמש גוגל');
+        } else {
+          // If user exists, update last seen
+          await _updateUserLastSeen(user.uid);
+        }
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (kDebugMode) print('Google sign in error: ${e.message}');
+      throw _handleAuthException(e);
+    } catch (e) {
+      if (kDebugMode) print('Unexpected Google sign in error: $e');
+      throw Exception('שגיאה בהתחברות עם גוגל: $e');
     }
   }
 
