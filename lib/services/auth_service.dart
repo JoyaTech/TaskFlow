@@ -107,7 +107,9 @@ class AuthService {
   /// Sign in with Google
   static Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn(
+        clientId: '915157123985-mbgcb1k0rn356ffcif6qafgoa8tu1ssd.apps.googleusercontent.com', // Web client ID
+      ).signIn();
       if (googleUser == null) {
         // The user canceled the sign-in
         return null;

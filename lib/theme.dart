@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LightModeColors {
   static const lightPrimary = Color(0xFF6B73FF);
@@ -89,64 +88,79 @@ ThemeData get lightTheme => ThemeData(
     foregroundColor: LightModeColors.lightOnPrimaryContainer,
     elevation: 0,
   ),
-  textTheme: TextTheme(
-    displayLarge: GoogleFonts.inter(
+  textTheme: const TextTheme(
+    displayLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displayLarge,
       fontWeight: FontWeight.normal,
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displayMedium,
       fontWeight: FontWeight.normal,
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displaySmall,
       fontWeight: FontWeight.w600,
     ),
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineLarge,
       fontWeight: FontWeight.normal,
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineMedium,
       fontWeight: FontWeight.w500,
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineSmall,
       fontWeight: FontWeight.bold,
     ),
-    titleLarge: GoogleFonts.inter(
+    titleLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleLarge,
       fontWeight: FontWeight.w500,
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleMedium,
       fontWeight: FontWeight.w500,
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleSmall,
       fontWeight: FontWeight.w500,
     ),
-    labelLarge: GoogleFonts.inter(
+    labelLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelLarge,
       fontWeight: FontWeight.w500,
     ),
-    labelMedium: GoogleFonts.inter(
+    labelMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelMedium,
       fontWeight: FontWeight.w500,
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelSmall,
       fontWeight: FontWeight.w500,
     ),
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodyLarge,
       fontWeight: FontWeight.normal,
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodyMedium,
       fontWeight: FontWeight.normal,
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodySmall,
       fontWeight: FontWeight.normal,
     ),
@@ -179,64 +193,79 @@ ThemeData get darkTheme => ThemeData(
     foregroundColor: DarkModeColors.darkOnPrimaryContainer,
     elevation: 0,
   ),
-  textTheme: TextTheme(
-    displayLarge: GoogleFonts.inter(
+  textTheme: const TextTheme(
+    displayLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displayLarge,
       fontWeight: FontWeight.normal,
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displayMedium,
       fontWeight: FontWeight.normal,
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.displaySmall,
       fontWeight: FontWeight.w600,
     ),
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineLarge,
       fontWeight: FontWeight.normal,
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineMedium,
       fontWeight: FontWeight.w500,
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: TextStyle(
+      fontFamily: 'NotoSerifHebrew',
       fontSize: FontSizes.headlineSmall,
       fontWeight: FontWeight.bold,
     ),
-    titleLarge: GoogleFonts.inter(
+    titleLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleLarge,
       fontWeight: FontWeight.w500,
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleMedium,
       fontWeight: FontWeight.w500,
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.titleSmall,
       fontWeight: FontWeight.w500,
     ),
-    labelLarge: GoogleFonts.inter(
+    labelLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelLarge,
       fontWeight: FontWeight.w500,
     ),
-    labelMedium: GoogleFonts.inter(
+    labelMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelMedium,
       fontWeight: FontWeight.w500,
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.labelSmall,
       fontWeight: FontWeight.w500,
     ),
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodyLarge,
       fontWeight: FontWeight.normal,
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodyMedium,
       fontWeight: FontWeight.normal,
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: TextStyle(
+      fontFamily: 'NotoSansHebrew',
       fontSize: FontSizes.bodySmall,
       fontWeight: FontWeight.normal,
     ),

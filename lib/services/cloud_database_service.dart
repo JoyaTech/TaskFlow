@@ -472,4 +472,9 @@ class CloudDatabaseService {
       throw Exception('שגיאה ביצירת גיבוי: $e');
     }
   }
+
+  /// Simple search tasks by query
+  static Future<List<Task>> searchTasks(String query) async {
+    return searchAndFilterTasks(query: query);
+  }
 }

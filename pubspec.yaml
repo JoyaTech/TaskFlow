@@ -66,7 +66,42 @@ flutter:
   
   assets:
     - assets/images/
+    - assets/fonts/
     - logo.jpg
     - Icon.jpg
     - favicon.jpg
     - welcome.jpeg
+  
+  fonts:
+    - family: NotoSansHebrew
+      fonts:
+        - asset: assets/fonts/NotoSansHebrew-Regular.ttf
+        - asset: assets/fonts/NotoSansHebrew-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/NotoSansHebrew-Light.ttf
+          weight: 300
+        - asset: assets/fonts/NotoSansHebrew-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansHebrew-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansHebrew-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSansHebrew-Black.ttf
+          weight: 900
+        - asset: assets/fonts/NotoSansHebrew-VariableFont_wdth,wght.ttf
+    - family: NotoSerifHebrew
+      fonts:
+        - asset: assets/fonts/NotoSerifHebrew-Regular.ttf
+        - asset: assets/fonts/NotoSerifHebrew-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/NotoSerifHebrew-Light.ttf
+          weight: 300
+        - asset: assets/fonts/NotoSerifHebrew-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSerifHebrew-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSerifHebrew-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSerifHebrew-Black.ttf
+          weight: 900
+        - asset: assets/fonts/NotoSerifHebrew-VariableFont_wdth,wght.ttf

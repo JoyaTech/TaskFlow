@@ -21,6 +21,8 @@ class GoogleCalendarService {
     _googleSignIn ??= GoogleSignIn(
       scopes: _scopes,
       signInOption: SignInOption.standard,
+      // Add client IDs for different platforms
+      clientId: '915157123985-mbgcb1k0rn356ffcif6qafgoa8tu1ssd.apps.googleusercontent.com', // Web client ID
     );
     return _googleSignIn!;
   }
@@ -67,7 +69,7 @@ class GoogleCalendarService {
       final authClient = authenticatedClient(
         Client(),
         AccessCredentials(
-          AccessToken('Bearer', auth.accessToken!, DateTime.now().add(const Duration(hours: 1))),
+          AccessToken('Bearer', auth.accessToken!, DateTime.now().toUtc().add(const Duration(hours: 1))),
           auth.idToken,
           _scopes,
         ),
@@ -326,11 +328,11 @@ class GoogleCalendarService {
   static Future<void> _saveAuthentication(GoogleSignInAuthentication auth) async {
     try {
       // 🔐 SECURITY FIX: Use secure storage for auth tokens
-      final authData = {
+      final authData = jsonEncode({
         'accessToken': auth.accessToken,
         'idToken': auth.idToken,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-      };
+      });
       await SecureStorageService.storeGoogleCalendarAuth(authData);
     } catch (e) {
       if (kDebugMode) print('Error saving authentication: $e');
@@ -340,10 +342,11 @@ class GoogleCalendarService {
   static Future<void> _restoreAuthentication() async {
     try {
       // 🔐 SECURITY FIX: Use secure storage for auth data
-      final authData = await SecureStorageService.getGoogleCalendarAuth();
+      final authString = await SecureStorageService.getGoogleCalendarAuth();
       
-      if (authData == null) return;
+      if (authString == null) return;
       
+      final authData = jsonDecode(authString);
       final timestamp = authData['timestamp'] as int;
       final savedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
       

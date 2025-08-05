@@ -76,24 +76,26 @@ class TaskRepository {
   
   /// Ensure user is authenticated before any operation
   void _requireAuth() {
-    if (!_auth.isLoggedIn) {
+    if (!AuthService.isLoggedIn) {
       throw Exception('משתמש לא מחובר - נדרש לוגין לביצוע פעולות');
     }
   }
   Stream<List<Task>> watchAllTasks() {
-    return _db.watchAllTasks();
+    return CloudDatabaseService.watchAllTasks();
   }
 
   Stream<List<Task>> watchTodayTasks() {
-    return _db.watchTodayTasks();
+    return CloudDatabaseService.watchTodayTasks();
   }
 
   Stream<List<Task>> watchCompletedTasks() {
-    return _db.watchCompletedTasks();
+    return CloudDatabaseService.watchAllTasks().map((tasks) => 
+        tasks.where((task) => task.isCompleted).toList());
   }
 
   Stream<List<Task>> watchNotes() {
-    return _db.watchNotes();
+    return CloudDatabaseService.watchAllTasks().map((tasks) => 
+        tasks.where((task) => task.type == TaskType.note).toList());
   }
 
   Stream<TaskStatistics> watchTaskStatistics() async* {
@@ -114,7 +116,7 @@ class TaskRepository {
 
 
   Future<void> createTask(Task task) async {
-    await _db.insertTask(task);
+    await CloudDatabaseService.insertTask(task);
     // Schedule notification if task has due date
     if (task.dueDate != null) {
       await NotificationService.scheduleTaskReminder(task);
@@ -122,25 +124,25 @@ class TaskRepository {
   }
 
   Future<void> updateTask(Task task) async {
-    await _db.updateTask(task);
+    await CloudDatabaseService.updateTask(task);
   }
 
   Future<void> deleteTask(String taskId) async {
-    await _db.deleteTask(taskId);
+    await CloudDatabaseService.deleteTask(taskId);
     await NotificationService.cancelTaskNotification(taskId);
   }
 
   Future<void> completeTask(String taskId) async {
-    final task = await _db.getTaskById(taskId);
+    final task = await CloudDatabaseService.getTaskById(taskId);
     if (task != null) {
       final updatedTask = task.copyWith(isCompleted: true);
-      await _db.updateTask(updatedTask);
+      await CloudDatabaseService.updateTask(updatedTask);
       await NotificationService.showCompletionCelebration(updatedTask);
     }
   }
 
   Future<List<Task>> searchTasks(String query) async {
-    return await _db.searchTasks(query);
+    return await CloudDatabaseService.searchTasks(query);
   }
 }
 

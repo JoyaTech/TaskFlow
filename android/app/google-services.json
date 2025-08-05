@@ -12,7 +12,20 @@
           "package_name": "com.mycompany.CounterApp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "915157123985-fl6ltrgae2fj5lc9bs5c46d6cuqvtfr7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.CounterApp",
+            "certificate_hash": "4d0710cfb9a7aaa49a2a99a4142f9ddeef184815"
+          }
+        },
+        {
+          "client_id": "915157123985-mbgcb1k0rn356ffcif6qafgoa8tu1ssd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCbworZMXXTzUVuXht16uxN4iW2xYyyCp8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "915157123985-mbgcb1k0rn356ffcif6qafgoa8tu1ssd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "915157123985-ujnsl32kv23ol74lqpgh2ncnbkfnsuh6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.CounterApp"
+              }
+            }
+          ]
         }
       }
     }
