@@ -132,8 +132,8 @@ class SecureStorageService {
     }
   }
 
-  // Specific API key methods for type safety
-  
+// Specific API key methods for type safety
+
   /// Store Gemini API key
   static Future<void> storeGeminiApiKey(String apiKey) async {
     await storeApiKey(_geminiApiKeyKey, apiKey);
@@ -183,6 +183,8 @@ class SecureStorageService {
   static Future<String?> getCalendarApiKey() async {
     return await getApiKey(_calendarApiKeyKey);
   }
+  
+
 
   /// Clear all stored data (for logout or account deletion)
   static Future<void> clearAllData() async {

@@ -203,7 +203,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -296,7 +296,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             Icon(
               Icons.calendar_today,
               size: 48,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+color: Theme.of(context).colorScheme.primary.withOpacity(0.7)
             ),
             const SizedBox(height: 16),
             Text(
@@ -372,7 +372,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             ? Text(
                 event.time!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+color: Theme.of(context).colorScheme.outline.withOpacity(0.3)
                 ),
               )
             : null,

@@ -4,9 +4,13 @@ import 'package:mindflow/task_model.dart';
 import 'package:mindflow/services/local_database_service.dart';
 import 'package:mindflow/services/notification_service.dart';
 
+final localDatabaseServiceProvider = Provider<LocalDatabaseService>((ref) {
+  return LocalDatabaseService();
+});
+
 // Task repository provider
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepository();
+  return TaskRepository(ref.watch(localDatabaseServiceProvider));
 });
 
 // All tasks provider
@@ -53,24 +57,24 @@ final habitProvider = StateNotifierProvider<HabitNotifier, HabitState>((ref) {
 final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
   return UserPreferencesNotifier();
 });
-
 // Task repository implementation
 class TaskRepository {
-  final LocalDatabaseService _db = LocalDatabaseService();
+  TaskRepository(this._db);
+  final LocalDatabaseService _db;
   Stream<List<Task>> watchAllTasks() {
-    return LocalDatabaseService.watchAllTasks();
+    return _db.watchAllTasks();
   }
 
   Stream<List<Task>> watchTodayTasks() {
-    return LocalDatabaseService.watchTodayTasks();
+    return _db.watchTodayTasks();
   }
 
   Stream<List<Task>> watchCompletedTasks() {
-    return LocalDatabaseService.watchCompletedTasks();
+    return _db.watchCompletedTasks();
   }
 
   Stream<List<Task>> watchNotes() {
-    return LocalDatabaseService.watchNotes();
+    return _db.watchNotes();
   }
 
   Stream<TaskStatistics> watchTaskStatistics() async* {
@@ -91,7 +95,7 @@ class TaskRepository {
 
 
   Future<void> createTask(Task task) async {
-    await LocalDatabaseService.insertTask(task);
+    await _db.insertTask(task);
     // Schedule notification if task has due date
     if (task.dueDate != null) {
       await NotificationService.scheduleTaskReminder(task);
@@ -99,21 +103,25 @@ class TaskRepository {
   }
 
   Future<void> updateTask(Task task) async {
-    await LocalDatabaseService.updateTask(task);
+    await _db.updateTask(task);
   }
 
   Future<void> deleteTask(String taskId) async {
-    await LocalDatabaseService.deleteTask(taskId);
+    await _db.deleteTask(taskId);
     await NotificationService.cancelTaskNotification(taskId);
   }
 
   Future<void> completeTask(String taskId) async {
-    final task = await LocalDatabaseService.getTaskById(taskId);
+    final task = await _db.getTaskById(taskId);
     if (task != null) {
-      final updatedTask = task.copyWith(isCompleted: true, completedAt: DateTime.now());
-      await LocalDatabaseService.updateTask(updatedTask);
+      final updatedTask = task.copyWith(isCompleted: true);
+      await _db.updateTask(updatedTask);
       await NotificationService.showCompletionCelebration(updatedTask);
     }
+  }
+
+  Future<List<Task>> searchTasks(String query) async {
+    return await _db.searchTasks(query);
   }
 }
 

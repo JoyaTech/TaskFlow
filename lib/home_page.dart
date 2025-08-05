@@ -307,8 +307,8 @@ class _HomePageState extends ConsumerState<HomePage>
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
+color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.psychology,
@@ -411,17 +411,16 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   Widget _buildProgressSection() {
-    final allTasks = ref.watch(allTasksProvider);
     final todayTasks = ref.watch(todayTasksProvider);
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.1),
+            Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -437,35 +436,45 @@ class _HomePageState extends ConsumerState<HomePage>
               SizedBox(
                 width: 60,
                 height: 60,
-                child: CircularProgressIndicator(
-                  value: todayTasks.when(
-                    data: (data) {
-                      final total = data.length;
-                      final completed = data.where((t) => t.isCompleted).length;
-                      return total > 0 ? completed / total : 0.0;
-                    },
-                    loading: () => 0.0,
-                    error: (_, __) => 0.0,
-                  ),
-                  strokeWidth: 6,
-                  backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
-                  ),
+                child: todayTasks.when(
+                  data: (data) {
+                    final total = data.length;
+                    final completed = data.where((t) => t.isCompleted).length;
+                    final progress = total > 0 ? completed / total : 0.0;
+                    return CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  },
+                  loading: () => const CircularProgressIndicator(),
+                  error: (_, __) => const CircularProgressIndicator(value: 0),
                 ),
               ),
-              Text(
-                '${(progress * 100).round()}%',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+              todayTasks.when(
+                data: (data) {
+                  final total = data.length;
+                  final completed = data.where((t) => t.isCompleted).length;
+                  final progress = total > 0 ? completed / total : 0.0;
+                  return Text(
+                    '${(progress * 100).round()}%',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  );
+                },
+                loading: () => const Text('0%'),
+                error: (_, __) => const Text('0%'),
               ),
             ],
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // Progress text
           Expanded(
             child: Column(
@@ -482,7 +491,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   data: (data) => Text(
                     '${data.where((t) => t.isCompleted).length} מתוך ${data.length} משימות הושלמו',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         ),
                   ),
                   loading: () => const Text('טוען נתונים...'),
@@ -491,15 +500,25 @@ class _HomePageState extends ConsumerState<HomePage>
               ],
             ),
           ),
-          
+
           // Celebration emoji
-          if (progress >= 1.0)
-            const Text('🎉', style: TextStyle(fontSize: 32)),
+          todayTasks.when(
+            data: (data) {
+              final total = data.length;
+              final completed = data.where((t) => t.isCompleted).length;
+              final progress = total > 0 ? completed / total : 0.0;
+              if (progress >= 1.0) {
+                return const Text('🎉', style: TextStyle(fontSize: 32));
+              }
+              return const SizedBox.shrink();
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
-
   Widget _buildTodayView() {
     final todayTasks = ref.watch(todayTasksProvider);
     
@@ -562,10 +581,9 @@ class _HomePageState extends ConsumerState<HomePage>
 
   Widget _buildCalendarView() {
     return GoogleCalendarService.isAuthenticated
-        ? CalendarWidget(
+? CalendarWidget(
             onTaskTap: _handleTaskTap,
-            onTaskCompleted: _handleTaskCompleted,
-            onRefresh: () => ref.refresh(allTasksProvider),
+            onTasksChanged: () => setState(() {}),
           )
         : Center(
             child: Padding(
@@ -576,14 +594,14 @@ class _HomePageState extends ConsumerState<HomePage>
                   Icon(
                     Icons.calendar_today_outlined,
                     size: 80,
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                    color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'יומן Google לא מחובר',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -591,7 +609,7 @@ class _HomePageState extends ConsumerState<HomePage>
                   Text(
                     'חבר את יומן Google שלך כדי לראות ולסנכרן את האירועים והמשימות החשובות',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -620,7 +638,6 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           );
   }
-
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {

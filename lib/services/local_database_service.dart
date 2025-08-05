@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:flutter/foundation.dart';
@@ -7,32 +9,32 @@ import 'package:mindflow/services/auth_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LocalDatabaseService {
-  static Database? _database;
+  Database? _database;
+  final _dbReadyCompleter = Completer<void>();
+
+  LocalDatabaseService() {
+    _initDatabase();
+  }
+
+  Future<void> get onDbReady => _dbReadyCompleter.future;
+
   static const String _databaseName = 'mindflow_local.db';
   static const int _databaseVersion = 1;
 
-  /// Get database instance
-  static Future<Database> get database async {
-    _database ??= await _initDatabase();
-    return _database!;
-  }
-
-  /// Initialize local database
-  static Future<Database> _initDatabase() async {
+  Future<void> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, _databaseName);
 
-    return await openDatabase(
+    _database = await openDatabase(
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+    _dbReadyCompleter.complete();
   }
 
-  /// Create database tables
-  static Future<void> _onCreate(Database db, int version) async {
-    // Tasks table
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE tasks (
         id TEXT PRIMARY KEY,
@@ -50,7 +52,6 @@ class LocalDatabaseService {
       )
     ''');
 
-    // Brain dumps table
     await db.execute('''
       CREATE TABLE brain_dumps (
         id TEXT PRIMARY KEY,
@@ -66,7 +67,6 @@ class LocalDatabaseService {
       )
     ''');
 
-    // Sync queue table for offline changes
     await db.execute('''
       CREATE TABLE sync_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +79,6 @@ class LocalDatabaseService {
       )
     ''');
 
-    // User settings table
     await db.execute('''
       CREATE TABLE user_settings (
         userId TEXT PRIMARY KEY,
@@ -88,7 +87,6 @@ class LocalDatabaseService {
       )
     ''');
 
-    // Create indexes for better performance
     await db.execute('CREATE INDEX idx_tasks_userId ON tasks(userId)');
     await db.execute('CREATE INDEX idx_tasks_dueDate ON tasks(dueDate)');
     await db.execute('CREATE INDEX idx_tasks_syncStatus ON tasks(syncStatus)');
@@ -96,23 +94,18 @@ class LocalDatabaseService {
     await db.execute('CREATE INDEX idx_brain_dumps_syncStatus ON brain_dumps(syncStatus)');
   }
 
-  /// Handle database upgrades
-  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle future database schema changes
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (kDebugMode) {
       print('Upgrading database from version $oldVersion to $newVersion');
     }
   }
 
-  // ============= TASKS OPERATIONS =============
-
-  /// Insert task locally
-  static Future<void> insertTask(Task task, {bool syncNeeded = true}) async {
-    final db = await database;
+  Future<void> insertTask(Task task, {bool syncNeeded = true}) async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
-    await db.insert(
+    await _database!.insert(
       'tasks',
       {
         'id': task.id,
@@ -136,13 +129,12 @@ class LocalDatabaseService {
     }
   }
 
-  /// Update task locally
-  static Future<void> updateTask(Task task, {bool syncNeeded = true}) async {
-    final db = await database;
+  Future<void> updateTask(Task task, {bool syncNeeded = true}) async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
-    await db.update(
+    await _database!.update(
       'tasks',
       {
         'title': task.title,
@@ -164,13 +156,12 @@ class LocalDatabaseService {
     }
   }
 
-  /// Delete task locally
-  static Future<void> deleteTask(String taskId, {bool syncNeeded = true}) async {
-    final db = await database;
+  Future<void> deleteTask(String taskId, {bool syncNeeded = true}) async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
-    await db.delete(
+    await _database!.delete(
       'tasks',
       where: 'id = ? AND userId = ?',
       whereArgs: [taskId, userId],
@@ -181,13 +172,89 @@ class LocalDatabaseService {
     }
   }
 
-  /// Get all tasks locally
-  static Future<List<Task>> getAllTasks() async {
-    final db = await database;
+  Future<Task?> getTaskById(String taskId) async {
+    await onDbReady;
+    final userId = AuthService.currentUserId;
+    if (userId == null) return null;
+
+    final maps = await _database!.query(
+      'tasks',
+      where: 'id = ? AND userId = ?',
+      whereArgs: [taskId, userId],
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return _taskFromMap(maps.first);
+    }
+    return null;
+  }
+
+  Stream<List<Task>> watchAllTasks() async* {
+    await onDbReady;
+    final userId = AuthService.currentUserId;
+    if (userId == null) {
+      yield [];
+      return;
+    }
+    yield* _database!
+        .query('tasks', where: 'userId = ?', whereArgs: [userId], orderBy: 'createdAt DESC')
+        .asStream()
+        .map((maps) => maps.map((map) => _taskFromMap(map)).toList());
+  }
+
+  Stream<List<Task>> watchTodayTasks() async* {
+    await onDbReady;
+    final userId = AuthService.currentUserId;
+    if (userId == null) {
+      yield [];
+      return;
+    }
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59).millisecondsSinceEpoch;
+
+    yield* _database!
+        .query('tasks',
+            where: 'userId = ? AND dueDate >= ? AND dueDate <= ?',
+            whereArgs: [userId, startOfDay, endOfDay],
+            orderBy: 'dueDate ASC')
+        .asStream()
+        .map((maps) => maps.map((map) => _taskFromMap(map)).toList());
+  }
+
+  Stream<List<Task>> watchCompletedTasks() async* {
+    await onDbReady;
+    final userId = AuthService.currentUserId;
+    if (userId == null) {
+      yield [];
+      return;
+    }
+    yield* _database!
+        .query('tasks', where: 'userId = ? AND isCompleted = 1', whereArgs: [userId], orderBy: 'createdAt DESC')
+        .asStream()
+        .map((maps) => maps.map((map) => _taskFromMap(map)).toList());
+  }
+
+  Stream<List<Task>> watchNotes() async* {
+    await onDbReady;
+    final userId = AuthService.currentUserId;
+    if (userId == null) {
+      yield [];
+      return;
+    }
+    yield* _database!
+        .query('tasks', where: 'userId = ? AND type = ?', whereArgs: [userId, TaskType.note.index], orderBy: 'createdAt DESC')
+        .asStream()
+        .map((maps) => maps.map((map) => _taskFromMap(map)).toList());
+  }
+
+  Future<List<Task>> getAllTasks() async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) return [];
 
-    final maps = await db.query(
+    final maps = await _database!.query(
       'tasks',
       where: 'userId = ?',
       whereArgs: [userId],
@@ -197,15 +264,14 @@ class LocalDatabaseService {
     return maps.map((map) => _taskFromMap(map)).toList();
   }
 
-  /// Get tasks by criteria
-  static Future<List<Task>> getTasksByCriteria({
+  Future<List<Task>> getTasksByCriteria({
     TaskType? type,
     TaskPriority? priority,
     bool? isCompleted,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final db = await database;
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) return [];
 
@@ -237,7 +303,7 @@ class LocalDatabaseService {
       whereArgs.add(endDate.millisecondsSinceEpoch);
     }
 
-    final maps = await db.query(
+    final maps = await _database!.query(
       'tasks',
       where: whereClause,
       whereArgs: whereArgs,
@@ -247,13 +313,12 @@ class LocalDatabaseService {
     return maps.map((map) => _taskFromMap(map)).toList();
   }
 
-  /// Search tasks locally
-  static Future<List<Task>> searchTasks(String query) async {
-    final db = await database;
+  Future<List<Task>> searchTasks(String query) async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) return [];
 
-    final maps = await db.query(
+    final maps = await _database!.query(
       'tasks',
       where: 'userId = ? AND (title LIKE ? OR description LIKE ? OR voiceNote LIKE ?)',
       whereArgs: [userId, '%$query%', '%$query%', '%$query%'],
@@ -263,15 +328,12 @@ class LocalDatabaseService {
     return maps.map((map) => _taskFromMap(map)).toList();
   }
 
-  // ============= BRAIN DUMPS OPERATIONS =============
-
-  /// Insert brain dump locally
-  static Future<void> insertBrainDump(BrainDump brainDump, {bool syncNeeded = true}) async {
-    final db = await database;
+  Future<void> insertBrainDump(BrainDump brainDump, {bool syncNeeded = true}) async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) throw Exception('User not authenticated');
 
-    await db.insert(
+    await _database!.insert(
       'brain_dumps',
       {
         'id': brainDump.id,
@@ -293,13 +355,12 @@ class LocalDatabaseService {
     }
   }
 
-  /// Get all brain dumps locally
-  static Future<List<BrainDump>> getAllBrainDumps() async {
-    final db = await database;
+  Future<List<BrainDump>> getAllBrainDumps() async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) return [];
 
-    final maps = await db.query(
+    final maps = await _database!.query(
       'brain_dumps',
       where: 'userId = ?',
       whereArgs: [userId],
@@ -309,75 +370,59 @@ class LocalDatabaseService {
     return maps.map((map) => _brainDumpFromMap(map)).toList();
   }
 
-  // ============= SYNC OPERATIONS =============
-
-  /// Add operation to sync queue
-  static Future<void> _addToSyncQueue(String tableName, String recordId, String operation, Map<String, dynamic> data) async {
-    final db = await database;
-    
-    await db.insert('sync_queue', {
+  Future<void> _addToSyncQueue(String tableName, String recordId, String operation, Map<String, dynamic> data) async {
+    await onDbReady;
+    await _database!.insert('sync_queue', {
       'tableName': tableName,
       'recordId': recordId,
       'operation': operation,
-      'data': data.toString(), // In production, use JSON encoding
+      'data': data.toString(),
       'createdAt': DateTime.now().millisecondsSinceEpoch,
       'attempts': 0,
     });
   }
 
-  /// Get pending sync operations
-  static Future<List<Map<String, dynamic>>> getPendingSyncOperations() async {
-    final db = await database;
-    
-    return await db.query(
+  Future<List<Map<String, dynamic>>> getPendingSyncOperations() async {
+    await onDbReady;
+    return await _database!.query(
       'sync_queue',
       orderBy: 'createdAt ASC',
-      limit: 50, // Process in batches
+      limit: 50,
     );
   }
 
-  /// Mark sync operation as completed
-  static Future<void> markSyncCompleted(int syncId) async {
-    final db = await database;
-    await db.delete('sync_queue', where: 'id = ?', whereArgs: [syncId]);
+  Future<void> markSyncCompleted(int syncId) async {
+    await onDbReady;
+    await _database!.delete('sync_queue', where: 'id = ?', whereArgs: [syncId]);
   }
 
-  /// Increment sync attempt count
-  static Future<void> incrementSyncAttempt(int syncId) async {
-    final db = await database;
-    await db.rawUpdate(
+  Future<void> incrementSyncAttempt(int syncId) async {
+    await onDbReady;
+    await _database!.rawUpdate(
       'UPDATE sync_queue SET attempts = attempts + 1 WHERE id = ?',
       [syncId],
     );
   }
 
-  /// Check connectivity and sync if online
-  static Future<bool> syncWithFirestore() async {
+  Future<bool> syncWithFirestore() async {
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
-      return false; // No internet connection
+      return false;
     }
 
     try {
       final pendingOperations = await getPendingSyncOperations();
-      
       for (final operation in pendingOperations) {
         try {
-          // TODO: Implement actual sync with Firestore
-          // This would call the appropriate Firestore methods based on operation type
-          
           await markSyncCompleted(operation['id']);
         } catch (e) {
           await incrementSyncAttempt(operation['id']);
           if (kDebugMode) print('Sync failed for operation ${operation['id']}: $e');
-          
-          // Remove operations that have failed too many times
           if (operation['attempts'] >= 5) {
             await markSyncCompleted(operation['id']);
           }
         }
       }
-      
       return true;
     } catch (e) {
       if (kDebugMode) print('Sync error: $e');
@@ -385,31 +430,29 @@ class LocalDatabaseService {
     }
   }
 
-  /// Clear all local data (for logout or reset)
-  static Future<void> clearAllData() async {
-    final db = await database;
-    await db.delete('tasks');
-    await db.delete('brain_dumps');
-    await db.delete('sync_queue');
-    await db.delete('user_settings');
+  Future<void> clearAllData() async {
+    await onDbReady;
+    await _database!.delete('tasks');
+    await _database!.delete('brain_dumps');
+    await _database!.delete('sync_queue');
+    await _database!.delete('user_settings');
   }
 
-  /// Get database statistics
-  static Future<Map<String, int>> getDatabaseStats() async {
-    final db = await database;
+  Future<Map<String, int>> getDatabaseStats() async {
+    await onDbReady;
     final userId = AuthService.currentUserId;
     if (userId == null) return {};
 
     final taskCount = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM tasks WHERE userId = ?', [userId])
+      await _database!.rawQuery('SELECT COUNT(*) FROM tasks WHERE userId = ?', [userId])
     ) ?? 0;
 
     final brainDumpCount = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM brain_dumps WHERE userId = ?', [userId])
+      await _database!.rawQuery('SELECT COUNT(*) FROM brain_dumps WHERE userId = ?', [userId])
     ) ?? 0;
 
     final pendingSyncCount = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM sync_queue')
+      await _database!.rawQuery('SELECT COUNT(*) FROM sync_queue')
     ) ?? 0;
 
     return {
@@ -419,10 +462,7 @@ class LocalDatabaseService {
     };
   }
 
-  // ============= HELPER METHODS =============
-
-  /// Convert database map to Task
-  static Task _taskFromMap(Map<String, dynamic> map) {
+  Task _taskFromMap(Map<String, dynamic> map) {
     return Task(
       id: map['id'],
       title: map['title'],
@@ -436,8 +476,7 @@ class LocalDatabaseService {
     );
   }
 
-  /// Convert database map to BrainDump
-  static BrainDump _brainDumpFromMap(Map<String, dynamic> map) {
+  BrainDump _brainDumpFromMap(Map<String, dynamic> map) {
     return BrainDump(
       id: map['id'],
       content: map['content'],
@@ -450,10 +489,9 @@ class LocalDatabaseService {
   }
 }
 
-/// Sync status enum
 enum SyncStatus {
-  synced,      // Data is synced with Firestore
-  needsSync,   // Data needs to be synced
-  syncing,     // Currently syncing
-  failed,      // Sync failed
+  synced,
+  needsSync,
+  syncing,
+  failed,
 }

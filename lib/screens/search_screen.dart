@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mindflow/providers/task_providers.dart';
 import 'package:mindflow/task_model.dart';
-import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/task_list_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMixin {
+class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   late TabController _tabController;
   
@@ -81,19 +82,10 @@ class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMix
     });
     
     try {
-    final tasks = await ref.read(taskRepositoryProvider).searchTasks(
-      query,
-      type: _selectedType,
-      priority: _selectedPriority,
-      isCompleted: _isCompleted,
-      startDate: _startDate,
-      endDate: _endDate,
-      sortBy: _sortBy,
-      descending: _descending,
-    );
+      final tasks = await ref.read(taskRepositoryProvider).searchTasks(query);
       
       setState(() {
-        _searchResults = results;
+        _searchResults = tasks;
         _isLoading = false;
       });
       

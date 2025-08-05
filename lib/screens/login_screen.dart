@@ -86,15 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-                );
-              },
-              child: const Text('שכחת סיסמה?'),
-            ),
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+            //     );
+            //   },
+            //   child: const Text('שכחת סיסמה?'),
+            // ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
