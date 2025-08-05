@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:googleapis_auth/googleapis_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:mindflow/task_model.dart';
+import 'package:mindflow/services/secure_storage_service.dart';
 
 class GoogleCalendarService {
   static GoogleSignIn? _googleSignIn;
@@ -28,8 +28,8 @@ class GoogleCalendarService {
   /// Initialize the Google Calendar service
   static Future<bool> initialize() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedAuth = prefs.getString('google_calendar_auth');
+      // 🔐 SECURITY FIX: Use secure storage for auth data
+      final savedAuth = await SecureStorageService.getGoogleCalendarAuth();
       
       if (savedAuth != null) {
         // Try to restore previous authentication
@@ -95,9 +95,8 @@ class GoogleCalendarService {
       _calendarApi = null;
       _isAuthenticated = false;
       
-      // Clear saved authentication
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('google_calendar_auth');
+      // 🔐 SECURITY FIX: Clear secure authentication data
+      await SecureStorageService.clearGoogleCalendarAuth();
       
       if (kDebugMode) print('Google Calendar sign-out successful');
     } catch (e) {
@@ -326,13 +325,13 @@ class GoogleCalendarService {
 
   static Future<void> _saveAuthentication(GoogleSignInAuthentication auth) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      // 🔐 SECURITY FIX: Use secure storage for auth tokens
       final authData = {
         'accessToken': auth.accessToken,
         'idToken': auth.idToken,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       };
-      await prefs.setString('google_calendar_auth', jsonEncode(authData));
+      await SecureStorageService.storeGoogleCalendarAuth(authData);
     } catch (e) {
       if (kDebugMode) print('Error saving authentication: $e');
     }
@@ -340,12 +339,11 @@ class GoogleCalendarService {
 
   static Future<void> _restoreAuthentication() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final authDataString = prefs.getString('google_calendar_auth');
+      // 🔐 SECURITY FIX: Use secure storage for auth data
+      final authData = await SecureStorageService.getGoogleCalendarAuth();
       
-      if (authDataString == null) return;
+      if (authData == null) return;
       
-      final authData = jsonDecode(authDataString);
       final timestamp = authData['timestamp'] as int;
       final savedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
       
@@ -370,7 +368,7 @@ class GoogleCalendarService {
         }
       } else {
         // Token expired, clear it
-        await prefs.remove('google_calendar_auth');
+        await SecureStorageService.clearGoogleCalendarAuth();
       }
     } catch (e) {
       if (kDebugMode) print('Error restoring authentication: $e');

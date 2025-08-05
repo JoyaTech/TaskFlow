@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mindflow/task_model.dart' as taskModel;
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
+import 'package:mindflow/services/secure_storage_service.dart';
+import 'package:mindflow/services/validation_service.dart';
 
 class VoiceService {
   static final SpeechToText _speechToText = SpeechToText();
@@ -57,12 +58,25 @@ class VoiceService {
 
   static Future<TaskParseResult?> parseHebrewCommand(String hebrewText) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final geminiApiKey = prefs.getString('gemini_api_key');
+      // 🔐 SECURITY FIX: Use secure storage instead of SharedPreferences
+      final geminiApiKey = await SecureStorageService.getGeminiApiKey();
+      
+      // ✅ VALIDATION: Sanitize and validate voice input
+      final sanitizedText = ValidationService.sanitizeHebrewText(hebrewText);
+      if (!ValidationService.isValidVoiceCommand(sanitizedText)) {
+        if (kDebugMode) print('⚠️ Invalid voice command: $hebrewText');
+        return null;
+      }
+      
+      // 🚫 RATE LIMITING: Prevent API abuse
+      if (ValidationService.isRateLimited('voice_command', maxRequests: 30, timeWindow: const Duration(minutes: 1))) {
+        if (kDebugMode) print('⚠️ Voice command rate limited');
+        throw Exception('יותר מדי פקודות קול. נסה שוב בעוד דקה.');
+      }
       
       if (geminiApiKey == null || geminiApiKey.isEmpty) {
         // Fallback to simple parsing for demo
-        return _simpleParseHebrew(hebrewText);
+        return _simpleParseHebrew(sanitizedText);
       }
 
       // Initialize Gemini model
@@ -94,7 +108,7 @@ class VoiceService {
 "פגישה עם דן ביום ראשון בצהריים" → intent: "create_event", content: "פגישה עם דן", date: יום ראשון הקרוב, time: "12:00"
 
 נתח את הבקשה הבאה והחזר רק JSON:
-$hebrewText''';
+$sanitizedText''';
 
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
