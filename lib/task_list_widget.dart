@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/task_model.dart';
+import 'package:mindflow/providers/task_providers.dart';
 import 'package:mindflow/database_service.dart';
+import 'package:intl/intl.dart';
 
 class TaskListWidget extends StatefulWidget {
   final List<Task> tasks;

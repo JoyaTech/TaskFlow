@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  # Navigation
+  go_router: ^14.2.7
+  # State Management
+  flutter_riverpod: ^2.5.1
   google_fonts: ^6.1.0
   speech_to_text: ^7.0.0
   sqflite: ^2.0.0

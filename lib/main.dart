@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/theme.dart';
 import 'package:mindflow/services/auth_service.dart';
 import 'package:mindflow/services/notification_service.dart';
 import 'package:mindflow/services/local_database_service.dart';
-import 'package:mindflow/screens/auth_wrapper.dart';
+import 'package:mindflow/core/router.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,7 +19,7 @@ void main() async {
   // Initialize services
   await _initializeServices();
   
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 /// Initialize all app services
@@ -36,18 +37,20 @@ Future<void> _initializeServices() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MindFlow - עוזר המשימות הישראלי',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    
+    return MaterialApp.router(
+      title: 'TaskFlow - עוזר המשימות החכם',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const AuthWrapper(),
+      routerConfig: router,
       locale: const Locale('he', 'IL'),
       // Add Hebrew localization support
       supportedLocales: const [
