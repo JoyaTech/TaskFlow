@@ -3,10 +3,20 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mindflow/services/validation_service.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+  // Rate limiting for security
+  static final Map<String, List<DateTime>> _loginAttempts = {};
+  static const int _maxLoginAttempts = 5;
+  static const Duration _lockoutDuration = Duration(minutes: 15);
+  
+  // Session management
+  static DateTime? _lastActivity;
+  static const Duration _sessionTimeout = Duration(hours: 24);
 
   // Get current user
   static User? get currentUser => _auth.currentUser;

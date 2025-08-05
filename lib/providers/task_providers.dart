@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/task_model.dart';
-import 'package:mindflow/services/local_database_service.dart';
+import 'package:mindflow/services/database_service.dart';
+import 'package:mindflow/services/cloud_database_service.dart';
+import 'package:mindflow/services/auth_service.dart';
 import 'package:mindflow/services/notification_service.dart';
 
-final localDatabaseServiceProvider = Provider<LocalDatabaseService>((ref) {
-  return LocalDatabaseService();
+// Secure cloud database service provider
+final cloudDatabaseServiceProvider = Provider<CloudDatabaseService>((ref) {
+  return CloudDatabaseService();
 });
 
-// Task repository provider
+// Authentication service provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});
+
+// Task repository provider with dependency injection
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepository(ref.watch(localDatabaseServiceProvider));
+  return TaskRepository(
+    ref.watch(cloudDatabaseServiceProvider),
+    ref.watch(authServiceProvider),
+  );
 });
 
 // All tasks provider
@@ -57,10 +68,18 @@ final habitProvider = StateNotifierProvider<HabitNotifier, HabitState>((ref) {
 final userPreferencesProvider = StateNotifierProvider<UserPreferencesNotifier, UserPreferences>((ref) {
   return UserPreferencesNotifier();
 });
-// Task repository implementation
+// Task repository implementation with authentication and security
 class TaskRepository {
-  TaskRepository(this._db);
-  final LocalDatabaseService _db;
+  TaskRepository(this._cloudDb, this._auth);
+  final CloudDatabaseService _cloudDb;
+  final AuthService _auth;
+  
+  /// Ensure user is authenticated before any operation
+  void _requireAuth() {
+    if (!_auth.isLoggedIn) {
+      throw Exception('משתמש לא מחובר - נדרש לוגין לביצוע פעולות');
+    }
+  }
   Stream<List<Task>> watchAllTasks() {
     return _db.watchAllTasks();
   }

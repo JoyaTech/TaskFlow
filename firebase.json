@@ -3,14 +3,14 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "taskflow-128iw",
+"projectId": "{{FIREBASE_PROJECT_ID}}",
           "appId": "1:915157123985:android:dd4ee16a3f96d8d5afd030",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "ios": {
         "default": {
-          "projectId": "taskflow-128iw",
+"projectId": "{{FIREBASE_PROJECT_ID}}",
           "appId": "1:915157123985:ios:0f06f1bcb3c181ebafd030",
           "uploadDebugSymbols": false,
           "fileOutput": "ios/Runner/GoogleService-Info.plist"
@@ -18,7 +18,7 @@
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "taskflow-128iw",
+"projectId": "{{FIREBASE_PROJECT_ID}}",
           "configurations": {
             "android": "1:915157123985:android:dd4ee16a3f96d8d5afd030",
             "ios": "1:915157123985:ios:0f06f1bcb3c181ebafd030",
