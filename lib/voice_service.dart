@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:mindflow/task_model.dart' as taskModel;
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -10,8 +11,11 @@ import 'package:mindflow/services/validation_service.dart';
 
 class VoiceService {
   static final SpeechToText _speechToText = SpeechToText();
+  static final FlutterTts _flutterTts = FlutterTts();
   static bool _speechEnabled = false;
   static bool _isListening = false;
+  static bool _ttsInitialized = false;
+  static bool _isSpeaking = false;
 
   static Future<bool> initialize() async {
     _speechEnabled = await _speechToText.initialize();

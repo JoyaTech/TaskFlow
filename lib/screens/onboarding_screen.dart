@@ -21,13 +21,13 @@ class OnboardingScreen extends StatelessWidget {
           PageViewModel(
             title: "פירוק משימות מורכבות",
             body: "הפרד משימות גדולות לקטנות ופשוטות.",
-            image: FocusFlowGraphics.taskBreakdownIllustration(),
+            image: MindFlowGraphics.taskBreakdownIllustration(),
             decoration: _getPageDecoration(),
           ),
           PageViewModel(
             title: "קלט קולי חכם",
             body: "המר את המחשבות שלך למשימות מסודרות.",
-            image: FocusFlowGraphics.voiceWaveIllustration(),
+            image: MindFlowGraphics.voiceWaveIllustration(),
             decoration: _getPageDecoration(),
           ),
         ],

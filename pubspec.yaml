@@ -18,6 +18,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   google_fonts: ^6.1.0
   speech_to_text: ^7.0.0
+  flutter_tts: ^4.0.2
   sqflite: ^2.0.0
   shared_preferences: ^2.0.0
   http: ^1.0.0
@@ -66,11 +67,25 @@ flutter:
   
   assets:
     - assets/images/
+    - assets/images/graphics/
+    - assets/images/icons/
+    - assets/images/backgrounds/
     - assets/fonts/
-    - logo.jpg
-    - Icon.jpg
-    - favicon.jpg
-    - welcome.jpeg
+    # Main app icons
+    - assets/images/logo.jpg
+    - assets/images/Icon.jpg
+    - assets/images/favicon.jpg
+    - assets/images/google_logo.png
+    # MindFlow Graphics
+    - assets/images/graphics/achieve.png
+    - assets/images/graphics/adhd.png
+    - assets/images/graphics/flow graphic.png
+    - assets/images/graphics/integration.png
+    - assets/images/graphics/taskcard.png
+    - assets/images/graphics/voiceinputgraphic.png
+    # Icons
+    - assets/images/icons/ICONSset.png
+    - assets/images/icons/mic.png
   
   fonts:
     - family: NotoSansHebrew

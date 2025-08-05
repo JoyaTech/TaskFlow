@@ -542,7 +542,7 @@ class VoiceWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.primaryBlue.withOpacity(0.8)
+      ..color = FocusFlowGraphics.primaryTint.withOpacity(0.8)
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -565,7 +565,7 @@ class VoiceWavePainter extends CustomPainter {
     
     // Add subtle task box at the end
     final boxPaint = Paint()
-      ..color = MindFlowGraphics.calmGray.withOpacity(0.3)
+      ..color = FocusFlowGraphics.neutralGray.withOpacity(0.3)
       ..style = PaintingStyle.fill;
     
     canvas.drawRRect(
@@ -638,7 +638,7 @@ class FocusFlowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final chaosPaint = Paint()
-      ..color = MindFlowGraphics.calmGray.withOpacity(0.4)
+      ..color = FocusFlowGraphics.neutralGray.withOpacity(0.4)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     
@@ -653,7 +653,7 @@ class FocusFlowPainter extends CustomPainter {
     
     // Single flowing line on the right
     final flowPaint = Paint()
-      ..color = MindFlowGraphics.primaryBlue
+      ..color = FocusFlowGraphics.primaryTint
       ..strokeWidth = 4
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -678,7 +678,7 @@ class CalmWavesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.professionalPurple.withOpacity(0.6)
+      ..color = FocusFlowGraphics.secondaryTint.withOpacity(0.6)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -710,7 +710,7 @@ class EmptyMindPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.calmGray.withOpacity(0.7)
+      ..color = FocusFlowGraphics.neutralGray.withOpacity(0.7)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     
@@ -726,7 +726,7 @@ class EmptyMindPainter extends CustomPainter {
     
     // Flowing lines inside representing clear thoughts
     final flowPaint = Paint()
-      ..color = MindFlowGraphics.primaryBlue.withOpacity(0.4)
+      ..color = FocusFlowGraphics.primaryTint.withOpacity(0.4)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     
@@ -750,7 +750,7 @@ class CelebrationStarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.primaryBlue
+      ..color = FocusFlowGraphics.primaryTint
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -781,7 +781,7 @@ class CelebrationCheckPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.professionalPurple
+      ..color = FocusFlowGraphics.secondaryTint
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -811,7 +811,7 @@ class CelebrationCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = MindFlowGraphics.primaryBlue.withOpacity(0.6 * (1 - progress))
+      ..color = FocusFlowGraphics.primaryTint.withOpacity(0.6 * (1 - progress))
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     
@@ -1364,6 +1364,49 @@ class AchievementBadgePainter extends CustomPainter {
 }
 
 // Update the old painter references to use new MindFlow colors
+class VoiceWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = MindFlowGraphics.primaryBlue.withOpacity(0.8)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    
+    final path = Path();
+    
+    // Chaotic wave on the left
+    path.moveTo(20, size.height * 0.5);
+    for (int i = 0; i < 5; i++) {
+      double x = 20 + (i * 20);
+      double y = size.height * 0.5 + (i % 2 == 0 ? -30 : 30) * (1 - i * 0.1);
+      path.lineTo(x, y);
+    }
+    
+    // Transition to organized line
+    path.lineTo(size.width * 0.7, size.height * 0.5);
+    path.lineTo(size.width - 20, size.height * 0.5);
+    
+    canvas.drawPath(path, paint);
+    
+    // Add subtle task box at the end
+    final boxPaint = Paint()
+      ..color = MindFlowGraphics.calmGray.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(size.width - 40, size.height * 0.4, 30, 20),
+        Radius.circular(4),
+      ),
+      boxPaint,
+    );
+  }
+  
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 // Helper function for math
 double cos(double angle) => math.cos(angle);
 double sin(double angle) => math.sin(angle);

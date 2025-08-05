@@ -50,7 +50,7 @@ class _TaskListWidgetState extends State<TaskListWidget>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FocusFlowGraphics.allDoneIllustration(size: 100),
+            MindFlowGraphics.allDoneIllustration(size: 100),
             const SizedBox(height: 24),
             Text(
               'סיימת הכל! כל הכבוד 🎉',

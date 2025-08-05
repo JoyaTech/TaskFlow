@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/providers/task_providers.dart';
 import 'package:mindflow/screens/analytics_screen.dart';
 import 'package:mindflow/screens/focus_timer_screen.dart';
+import 'package:mindflow/screens/graphics_demo_screen.dart';
 
 class DemoApp extends StatelessWidget {
   const DemoApp({super.key});
@@ -38,6 +39,7 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
     const DemoTasksView(),
     const AnalyticsScreen(),
     const FocusTimerScreen(),
+    const GraphicsDemoScreen(),
   ];
 
   @override
@@ -76,6 +78,11 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
             icon: Icon(Icons.timer_outlined),
             selectedIcon: Icon(Icons.timer),
             label: 'פוקוס',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.palette_outlined),
+            selectedIcon: Icon(Icons.palette),
+            label: 'גרפיקות',
           ),
         ],
       ),

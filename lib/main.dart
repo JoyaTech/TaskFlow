@@ -10,7 +10,7 @@ import 'package:mindflow/demo_app.dart';
 import 'firebase_options.dart';
 
 // Set to true to run the demo version
-const bool kUseDemo = false;
+const bool kUseDemo = true;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
