@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindflow/task_model.dart';
-import 'package:mindflow/database_service.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/task_list_widget.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -81,7 +81,7 @@ class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMix
     });
     
     try {
-      final results = await DatabaseService.searchAndFilterTasks(
+      final results = await MockDatabaseService.searchAndFilterTasks(
         query: query,
         type: _selectedType,
         priority: _selectedPriority,

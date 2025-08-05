@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindflow/task_model.dart';
 import 'package:mindflow/providers/task_providers.dart';
-import 'package:mindflow/database_service.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 import 'package:intl/intl.dart';
 
 class TaskListWidget extends StatefulWidget {
@@ -102,7 +102,7 @@ class _TaskListWidgetState extends State<TaskListWidget>
     _animationController.forward();
 
     // Update database
-    await DatabaseService.markTaskCompleted(task.id);
+    await MockDatabaseService.markTaskCompleted(task.id);
 
     // Call parent callback
     widget.onTaskCompleted(task);

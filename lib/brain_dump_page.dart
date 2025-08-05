@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mindflow/brain_dump_model.dart';
 import 'package:mindflow/brain_dump_service.dart';
-import 'package:mindflow/database_service.dart';
+import 'package:mindflow/services/mock_database_service.dart';
 import 'package:mindflow/task_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -105,7 +105,7 @@ class _BrainDumpPageState extends State<BrainDumpPage>
         voiceNote: 'מחשבה מהירה: ${brainDump.content}',
       );
 
-      await DatabaseService.insertTask(task);
+      await MockDatabaseService.insertTask(task);
       await BrainDumpService.markAsProcessed(brainDump.id, task.id);
       
       _loadBrainDumps();

@@ -151,4 +151,63 @@ class MockDatabaseService {
       await Future.delayed(const Duration(seconds: 2));
     }
   }
-}
+
+
+  static Future<List<Task>> searchAndFilterTasks({
+    String query = '',
+    TaskType? type,
+    TaskPriority? priority,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isCompleted,
+    String sortBy = 'createdAt',
+    bool descending = true,
+  }) async {
+    await initialize();
+
+    List<Task> results = List.from(_tasks);
+
+    if (query.isNotEmpty) {
+      results = results.where((task) =>
+          task.title.toLowerCase().contains(query.toLowerCase()) ||
+          task.description.toLowerCase().contains(query.toLowerCase())
+      ).toList();
+    }
+
+    if (type != null) {
+      results = results.where((task) => task.type == type).toList();
+    }
+
+    if (priority != null) {
+      results = results.where((task) => task.priority == priority).toList();
+    }
+
+    if (startDate != null) {
+      results = results.where((task) => task.dueDate != null && task.dueDate!.isAfter(startDate)).toList();
+    }
+
+    if (endDate != null) {
+      results = results.where((task) => task.dueDate != null && task.dueDate!.isBefore(endDate)).toList();
+    }
+
+    if (isCompleted != null) {
+      results = results.where((task) => task.isCompleted == isCompleted).toList();
+    }
+
+    results.sort((a, b) {
+      int comparison;
+      switch (sortBy) {
+        case 'dueDate':
+          comparison = a.dueDate?.compareTo(b.dueDate ?? DateTime.now()) ?? 0;
+          break;
+        case 'priority':
+          comparison = a.priority.index.compareTo(b.priority.index);
+          break;
+        default:
+          comparison = a.createdAt.compareTo(b.createdAt);
+      }
+      return descending ? -comparison : comparison;
+    });
+
+    return results;
+  }
