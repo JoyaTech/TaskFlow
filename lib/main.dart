@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindflow/core/theme/app_theme.dart';
-import 'package:mindflow/core/theme/theme_provider.dart';
+import 'theme.dart';
+import 'providers/theme_provider.dart';
 import 'package:mindflow/services/notification_service.dart';
 import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/core/router.dart';
@@ -55,14 +55,14 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeProvider);
+    final themeState = ref.watch(themeProvider);
     
     return MaterialApp(
-      title: 'TaskFlow - עוזר המשימות החכם',
+      title: 'MindFlow - עוזר המשימות החכם',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      theme: themeState.lightTheme,
+      darkTheme: themeState.darkTheme,
+      themeMode: themeState.materialThemeMode,
       home: const TaskListPage(), // Direct to Clean Architecture page
       locale: const Locale('he', 'IL'),
       // Add Hebrew localization support

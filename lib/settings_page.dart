@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mindflow/services/google_calendar_service.dart';
 import 'package:mindflow/services/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'providers/theme_provider.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _openaiController = TextEditingController();
   final _geminiController = TextEditingController();
   final _googleApiController = TextEditingController();
@@ -213,6 +216,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   
                   const SizedBox(height: 24),
                   
+                  // Theme Settings Section
+                  _buildSectionHeader('מראה האפליקציה', Icons.palette),
+                  _buildThemeSettingsCard(),
+                  
+                  const SizedBox(height: 24),
+                  
                   // Voice Settings Section
                   _buildSectionHeader('הגדרות קול', Icons.mic),
                   _buildVoiceSettingsCard(),
@@ -403,6 +412,193 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildThemeSettingsCard() {
+    final currentTheme = ref.watch(themeProvider);
+    
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  currentTheme.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'ערכת נושא: ${currentTheme.themeMode.displayName}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                // Quick toggle button
+                IconButton(
+                  onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+                  icon: Icon(
+                    currentTheme.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                    size: 20,
+                  ),
+                  tooltip: currentTheme.isDarkMode ? 'עבור למצב בהיר' : 'עבור למצב כהה',
+                ).animate(target: 1).scale(delay: 100.ms),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            Text(
+              'בחר ערכת נושא:',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Theme mode options
+            ...AppThemeMode.values.map((mode) => _buildThemeOption(
+              mode: mode,
+              isSelected: currentTheme.themeMode == mode,
+              onTap: () => ref.read(themeProvider.notifier).setThemeMode(mode),
+            )).toList(),
+            
+            const SizedBox(height: 16),
+            
+            // Theme preview
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: currentTheme.effectiveTheme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.palette,
+                        color: currentTheme.effectiveTheme.colorScheme.onPrimaryContainer,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'תצוגה מקדימה',
+                        style: TextStyle(
+                          color: currentTheme.effectiveTheme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: currentTheme.effectiveTheme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: currentTheme.effectiveTheme.colorScheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: currentTheme.effectiveTheme.colorScheme.tertiary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'צבעי הערכה יתעדכנו בכל האפליקציה',
+                    style: TextStyle(
+                      color: currentTheme.effectiveTheme.colorScheme.onPrimaryContainer
+                          .withOpacity(0.8),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildThemeOption({
+    required AppThemeMode mode,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                mode.icon,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  mode.displayName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 18,
+                ).animate().scale(curve: Curves.elasticOut),
+            ],
+          ),
+        ).animate(target: isSelected ? 1 : 0)
+            .scaleXY(begin: 0.98, end: 1.0)
+            .shimmer(duration: 500.ms, color: Theme.of(context).colorScheme.primary.withOpacity(0.1)),
+      ),
     );
   }
 
