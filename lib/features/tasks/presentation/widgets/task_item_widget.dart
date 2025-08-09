@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../domain/entities/task.dart';
 import '../providers/task_providers.dart';
+import '../../../calendar/domain/usecases/sync_task_to_calendar.dart';
+import '../../../calendar/data/datasources/google_calendar_datasource.dart';
 
 /// Modern task item widget with completion animation and actions
 class TaskItemWidget extends ConsumerWidget {
@@ -35,7 +38,16 @@ class TaskItemWidget extends ConsumerWidget {
           onLongPress: () => _showTaskActions(context, ref),
         ),
       ),
-    );
+    )
+    // 🎉 ADHD-Friendly Satisfying Completion Animations!
+    .animate(target: task.isCompleted ? 1 : 0)
+    .fade(begin: 1.0, end: 0.7, duration: 300.ms) // Gentle fade when completed
+    .scaleXY(begin: 1.0, end: 0.98, duration: 200.ms) // Slight shrink effect
+    .slideX(begin: 0, end: -0.05, duration: 400.ms) // Subtle slide to indicate "done"
+    .then() // Chain another animation for extra satisfaction
+    .shake(hz: 2, curve: Curves.easeInOut) // Brief celebration shake
+    .animate(target: task.isCompleted ? 1 : 0, delay: 100.ms)
+    .shimmer(duration: 1000.ms, color: Colors.green.withOpacity(0.3)); // Success shimmer
   }
 
   Widget _buildLeadingIcon(BuildContext context, WidgetRef ref) {
@@ -63,9 +75,17 @@ class TaskItemWidget extends ConsumerWidget {
                 color: Colors.white,
                 size: 18,
               )
+                .animate(target: task.isCompleted ? 1 : 0)
+                .scaleXY(begin: 0.5, end: 1.0, duration: 300.ms, curve: Curves.elasticOut)
+                .fade(begin: 0.0, end: 1.0, duration: 200.ms)
             : null,
       ),
-    );
+    )
+    // Extra celebration for the checkbox itself
+    .animate(target: task.isCompleted ? 1 : 0, delay: 50.ms)
+    .scaleXY(begin: 1.0, end: 1.2, duration: 150.ms, curve: Curves.easeOut)
+    .then()
+    .scaleXY(begin: 1.2, end: 1.0, duration: 150.ms, curve: Curves.easeIn);
   }
 
   Widget _buildTitle(BuildContext context) {
@@ -220,13 +240,13 @@ class TaskItemWidget extends ConsumerWidget {
 }
 
 /// Task details bottom sheet
-class TaskDetailsSheet extends StatelessWidget {
+class TaskDetailsSheet extends ConsumerWidget {
   final Task task;
 
   const TaskDetailsSheet({super.key, required this.task});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(24),
@@ -293,9 +313,75 @@ class TaskDetailsSheet extends StatelessWidget {
               )).toList(),
             ),
           ],
+          const SizedBox(height: 24),
+          // Sync to Calendar button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _syncToCalendar(context, ref),
+              icon: const Icon(Icons.calendar_month),
+              label: const Text('סנכרן ליומן'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _syncToCalendar(BuildContext context, WidgetRef ref) async {
+    try {
+      // Create a simple provider for the sync use case
+      final googleCalendarDataSource = GoogleCalendarDataSource();
+      final syncUseCase = SyncTaskToCalendar(googleCalendarDataSource);
+      
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('מסנכרן ליומן...'),
+            ],
+          ),
+        ),
+      );
+      
+      await syncUseCase(task);
+      
+      // Close loading dialog
+      if (context.mounted) Navigator.of(context).pop();
+      
+      // Show success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('המשימה סונכרנה ליומן בהצלחה!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if it's still open
+      if (context.mounted) Navigator.of(context).pop();
+      
+      // Show error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('שגיאה בסינכרון: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

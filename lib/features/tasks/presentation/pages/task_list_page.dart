@@ -5,6 +5,7 @@ import '../widgets/task_item_widget.dart';
 import '../widgets/task_filter_bar.dart';
 import '../widgets/add_task_fab.dart';
 import '../../domain/entities/task.dart';
+import '../../../brain_dump/presentation/pages/brain_dump_page.dart';
 
 /// Modern task list page using Clean Architecture with Riverpod
 class TaskListPage extends ConsumerWidget {
@@ -23,6 +24,16 @@ class TaskListPage extends ConsumerWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
+          // Brain Dump button - for ADHD quick thought capture
+          IconButton(
+            icon: const Icon(Icons.psychology),
+            tooltip: 'זרם המחשבות - שפוך את כל הרעיונות',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const BrainDumpPage(),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.read(taskListProvider.notifier).refresh(),

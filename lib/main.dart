@@ -7,11 +7,12 @@ import 'package:mindflow/core/theme/theme_provider.dart';
 import 'package:mindflow/services/notification_service.dart';
 import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/core/router.dart';
+import 'package:mindflow/features/tasks/presentation/pages/task_list_page.dart';
 import 'package:mindflow/demo_app.dart';
 import 'firebase_options.dart';
 
-// Set to true to run the demo version
-const bool kUseDemo = true;
+// Set to false to use the Clean Architecture version, true for demo
+const bool kUseDemo = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,16 +55,15 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider);
     
-    return MaterialApp.router(
-      title: 'FocusFlow - עוזר המשימות החכם',
+    return MaterialApp(
+      title: 'TaskFlow - עוזר המשימות החכם',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      routerConfig: router,
+      home: const TaskListPage(), // Direct to Clean Architecture page
       locale: const Locale('he', 'IL'),
       // Add Hebrew localization support
       supportedLocales: const [

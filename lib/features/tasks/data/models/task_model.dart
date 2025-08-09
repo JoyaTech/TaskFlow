@@ -1,7 +1,7 @@
-import '../../../domain/entities/task.dart';
+import '../../domain/entities/task.dart';
 
-/// Data model for tasks with serialization logic
-/// Extends the domain entity to add data-layer specific functionality
+/// Data layer model for Task entity with serialization capabilities
+/// Extends Task to add conversion methods for persistence
 class TaskModel extends Task {
   const TaskModel({
     required String id,
