@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/task_providers.dart';
 import '../widgets/task_item_widget.dart';
 import '../widgets/task_filter_bar.dart';
-import '../widgets/add_task_fab.dart';
+import '../widgets/auto_smart_ai_fab.dart';
 import '../../domain/entities/task.dart';
 import '../../../brain_dump/presentation/pages/brain_dump_page.dart';
 
@@ -64,7 +64,7 @@ class TaskListPage extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: const AddTaskFab(),
+      floatingActionButton: const AutoSmartAITaskFab(),
     );
   }
 

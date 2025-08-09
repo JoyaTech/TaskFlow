@@ -168,10 +168,9 @@ class CreateTaskWithAI {
       tags: data.tags,
       isCompleted: false,
       createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
     );
 
-    return await taskRepository.saveTask(task);
+    return await taskRepository.addTask(task);
   }
 
   /// Create sub-tasks if needed for ADHD support
@@ -206,10 +205,9 @@ class CreateTaskWithAI {
         ],
         isCompleted: false,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
       );
 
-      final savedSubTask = await taskRepository.saveTask(subTask);
+      final savedSubTask = await taskRepository.addTask(subTask);
       subTasks.add(savedSubTask);
     }
 
