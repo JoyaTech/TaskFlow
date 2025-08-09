@@ -56,6 +56,8 @@ dependencies:
   googleapis: ^13.1.0
   googleapis_auth: ^1.6.0
   google_sign_in: ^6.2.1
+  # Domain layer
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
