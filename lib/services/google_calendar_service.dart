@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
@@ -328,11 +327,12 @@ class GoogleCalendarService {
   static Future<void> _saveAuthentication(GoogleSignInAuthentication auth) async {
     try {
       // 🔐 SECURITY FIX: Use secure storage for auth tokens
-      final authData = jsonEncode({
+      // SecureStorageService now handles JSON encoding internally
+      final authData = {
         'accessToken': auth.accessToken,
         'idToken': auth.idToken,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
+      };
       await SecureStorageService.storeGoogleCalendarAuth(authData);
     } catch (e) {
       if (kDebugMode) print('Error saving authentication: $e');
@@ -342,36 +342,38 @@ class GoogleCalendarService {
   static Future<void> _restoreAuthentication() async {
     try {
       // 🔐 SECURITY FIX: Use secure storage for auth data
-      final authString = await SecureStorageService.getGoogleCalendarAuth();
+      // SecureStorageService now handles JSON decoding internally and gracefully handles corruption
+      final Map<String, dynamic>? authData = await SecureStorageService.getGoogleCalendarAuth();
       
-      if (authString == null) return;
-      
-      final authData = jsonDecode(authString);
-      final timestamp = authData['timestamp'] as int;
-      final savedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      
-      // Check if token is still valid (less than 1 hour old)
-      if (DateTime.now().difference(savedTime).inHours < 1) {
-        // Try to restore the session
+      if (authData != null) {
+        // Extract values directly from the Map
+        final timestamp = authData['timestamp'] as int;
         final accessToken = authData['accessToken'] as String?;
-        if (accessToken != null) {
-          final authClient = authenticatedClient(
-            Client(),
-            AccessCredentials(
-              AccessToken('Bearer', accessToken, DateTime.now().add(const Duration(hours: 1))),
-              authData['idToken'] as String?,
-              _scopes,
-            ),
-          );
+        final idToken = authData['idToken'] as String?;
+        final savedTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+        
+        // Check if token is still valid (less than 1 hour old)
+        if (DateTime.now().difference(savedTime).inHours < 1) {
+          // Try to restore the session
+          if (accessToken != null) {
+            final authClient = authenticatedClient(
+              Client(),
+              AccessCredentials(
+                AccessToken('Bearer', accessToken, DateTime.now().add(const Duration(hours: 1))),
+                idToken,
+                _scopes,
+              ),
+            );
 
-          _calendarApi = calendar.CalendarApi(authClient);
-          _isAuthenticated = true;
-          
-          if (kDebugMode) print('Google Calendar authentication restored');
+            _calendarApi = calendar.CalendarApi(authClient);
+            _isAuthenticated = true;
+            
+            if (kDebugMode) print('Google Calendar authentication restored');
+          }
+        } else {
+          // Token expired, clear it
+          await SecureStorageService.clearGoogleCalendarAuth();
         }
-      } else {
-        // Token expired, clear it
-        await SecureStorageService.clearGoogleCalendarAuth();
       }
     } catch (e) {
       if (kDebugMode) print('Error restoring authentication: $e');
@@ -380,13 +382,13 @@ class GoogleCalendarService {
 
   static Future<void> _saveTaskCalendarMapping(String taskId, String eventId) async {
     try {
-      final secureStorage = SecureStorageService();
-      final existingMappings = await SecureStorageService.getTaskCalendarMappings() ?? '{}';
-      final mappings = Map<String, String>.from(jsonDecode(existingMappings));
+      // SecureStorageService now handles JSON encoding/decoding internally
+      final existingMappings = await SecureStorageService.getTaskCalendarMappings() ?? <String, String>{};
+      final mappings = Map<String, String>.from(existingMappings);
       
       mappings[taskId] = eventId;
       
-      await SecureStorageService.setTaskCalendarMappings(jsonEncode(mappings));
+      await SecureStorageService.setTaskCalendarMappings(mappings);
     } catch (e) {
       if (kDebugMode) print('Error saving task-calendar mapping: $e');
     }
@@ -394,11 +396,10 @@ class GoogleCalendarService {
 
   static Future<String?> getEventIdForTask(String taskId) async {
     try {
-      final secureStorage = SecureStorageService();
-      final mappingsString = await SecureStorageService.getTaskCalendarMappings() ?? '{}';
-      final mappings = Map<String, String>.from(jsonDecode(mappingsString));
+      // SecureStorageService now handles JSON decoding internally
+      final mappings = await SecureStorageService.getTaskCalendarMappings();
       
-      return mappings[taskId];
+      return mappings?[taskId];
     } catch (e) {
       if (kDebugMode) print('Error getting event ID for task: $e');
       return null;

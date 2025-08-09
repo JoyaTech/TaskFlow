@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureStorageService {
@@ -34,14 +36,75 @@ class SecureStorageService {
   static Future<void> storeGmailApiKey(String key) => writeSecureData('gmail_api_key', key);
   static Future<void> storeCalendarApiKey(String key) => writeSecureData('calendar_api_key', key);
 
-  // Google Calendar Authentication methods
-  static Future<String?> getGoogleCalendarAuth() => readSecureData('google_calendar_auth');
-  static Future<void> storeGoogleCalendarAuth(String authData) => writeSecureData('google_calendar_auth', authData);
-  static Future<void> clearGoogleCalendarAuth() => deleteSecureData('google_calendar_auth');
+  // Google Calendar Authentication methods with JSON encapsulation
+  static const _googleAuthKey = 'google_calendar_auth';
+  static const _taskCalendarMappingsKey = 'task_calendar_mappings';
+  
+  /// Store Google Calendar authentication data as a Map
+  /// The service handles JSON encoding internally
+  static Future<void> storeGoogleCalendarAuth(Map<String, dynamic> authData) async {
+    try {
+      final String authDataJson = jsonEncode(authData);
+      await writeSecureData(_googleAuthKey, authDataJson);
+    } catch (e) {
+      if (kDebugMode) print('Error encoding Google Calendar auth data: $e');
+      rethrow;
+    }
+  }
+  
+  /// Retrieve Google Calendar authentication data as a Map
+  /// The service handles JSON decoding internally and gracefully handles corruption
+  static Future<Map<String, dynamic>?> getGoogleCalendarAuth() async {
+    try {
+      final String? authDataJson = await readSecureData(_googleAuthKey);
+      if (authDataJson == null || authDataJson.isEmpty) {
+        return null;
+      }
+      
+      return jsonDecode(authDataJson) as Map<String, dynamic>;
+    } catch (e) {
+      if (kDebugMode) print('Error decoding Google Calendar auth data (possibly corrupted): $e');
+      // If decoding fails (corrupt data), delete it and return null
+      await clearGoogleCalendarAuth();
+      return null;
+    }
+  }
+  
+  /// Clear Google Calendar authentication data
+  static Future<void> clearGoogleCalendarAuth() async {
+    await deleteSecureData(_googleAuthKey);
+  }
 
-  // Task-Calendar Mappings
-  static Future<String?> getTaskCalendarMappings() => readSecureData('task_calendar_mappings');
-  static Future<void> setTaskCalendarMappings(String mappings) => writeSecureData('task_calendar_mappings', mappings);
+  /// Store task-calendar mappings as a Map
+  /// The service handles JSON encoding internally
+  static Future<void> setTaskCalendarMappings(Map<String, String> mappings) async {
+    try {
+      final String mappingsJson = jsonEncode(mappings);
+      await writeSecureData(_taskCalendarMappingsKey, mappingsJson);
+    } catch (e) {
+      if (kDebugMode) print('Error encoding task-calendar mappings: $e');
+      rethrow;
+    }
+  }
+  
+  /// Retrieve task-calendar mappings as a Map
+  /// The service handles JSON decoding internally and gracefully handles corruption
+  static Future<Map<String, String>?> getTaskCalendarMappings() async {
+    try {
+      final String? mappingsJson = await readSecureData(_taskCalendarMappingsKey);
+      if (mappingsJson == null || mappingsJson.isEmpty) {
+        return null;
+      }
+      
+      final decoded = jsonDecode(mappingsJson);
+      return Map<String, String>.from(decoded);
+    } catch (e) {
+      if (kDebugMode) print('Error decoding task-calendar mappings (possibly corrupted): $e');
+      // If decoding fails (corrupt data), delete it and return null
+      await deleteSecureData(_taskCalendarMappingsKey);
+      return null;
+    }
+  }
 
   // Instance methods for backward compatibility
   final _instanceStorage = const FlutterSecureStorage();
