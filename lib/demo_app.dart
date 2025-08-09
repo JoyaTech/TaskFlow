@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mindflow/core/theme/app_theme.dart';
+import 'package:mindflow/core/theme/theme_provider.dart';
 import 'package:mindflow/providers/task_providers.dart';
 import 'package:mindflow/screens/analytics_screen.dart';
 import 'package:mindflow/screens/focus_timer_screen.dart';
 import 'package:mindflow/screens/graphics_demo_screen.dart';
 
-class DemoApp extends StatelessWidget {
+class DemoApp extends ConsumerWidget {
   const DemoApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp(
-        title: 'TaskFlow - Demo',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          fontFamily: 'Rubik',
-        ),
-        home: const DemoHomeScreen(),
-        debugShowCheckedModeBanner: false,
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    
+    return MaterialApp(
+      title: 'TaskFlow - Demo',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      home: const DemoHomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -47,9 +47,18 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('TaskFlow - דמו', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        elevation: 0,
         actions: [
+          // Theme toggle button
+          Consumer(
+            builder: (context, ref, child) {
+              final themeNotifier = ref.read(themeProvider.notifier);
+              return IconButton(
+                icon: Icon(themeNotifier.currentThemeIcon),
+                tooltip: 'החלף ערכת נושא (${themeNotifier.currentThemeDisplayName})',
+                onPressed: () => themeNotifier.toggleTheme(),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () => _showDemoInfo(context),
@@ -114,11 +123,11 @@ class _DemoHomeScreenState extends ConsumerState<DemoHomeScreen> {
   }
 }
 
-class DemoTasksView extends StatelessWidget {
+class DemoTasksView extends ConsumerWidget {
   const DemoTasksView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -167,6 +176,20 @@ class DemoTasksView extends StatelessWidget {
           
           const SizedBox(height: 16),
           
+          // Theme Demo Section
+          _buildThemeDemoSection(context, ref),
+          
+          const SizedBox(height: 24),
+          
+          Text(
+            'מאפיינים נוספים',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
           Expanded(
             child: ListView(
               children: [
@@ -175,7 +198,7 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.analytics,
                   title: 'סטטיסטיקות מתקדמות',
                   description: 'לוח בקרה עם גרפים ותובנות על הפרודוקטיביות שלך',
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 
                 _buildFeatureCard(
@@ -183,7 +206,7 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.timer,
                   title: 'טיימר פוקוס (פומודורו)',
                   description: 'עבוד בסשנים קצרים עם הפסקות לשיפור הריכוז',
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
                 
                 _buildFeatureCard(
@@ -191,7 +214,7 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.track_changes,
                   title: 'מעקב הרגלים',
                   description: 'בנה הרגלים טובים ועקוב אחר ההתקדמות שלך',
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.tertiary,
                 ),
                 
                 _buildFeatureCard(
@@ -199,7 +222,7 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.psychology,
                   title: 'תכונות ADHD',
                   description: 'כלים מיוחדים לשיפור הזיכרון וההתמקדות',
-                  color: Colors.purple,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
                 ),
                 
                 _buildFeatureCard(
@@ -207,7 +230,7 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.mic,
                   title: 'קלט קולי בעברית',
                   description: 'הוסף משימות באמצעות פקודות קוליות בעברית',
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
                 ),
                 
                 _buildFeatureCard(
@@ -215,12 +238,105 @@ class DemoTasksView extends StatelessWidget {
                   icon: Icons.lightbulb,
                   title: 'תובנות חכמות',
                   description: 'המלצות אישיות לשיפור הפרודוקטיביות',
-                  color: Colors.amber,
+                  color: Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildThemeDemoSection(BuildContext context, WidgetRef ref) {
+    final themeNotifier = ref.read(themeProvider.notifier);
+    final currentTheme = ref.watch(themeProvider);
+    
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.palette, size: 24),
+                const SizedBox(width: 12),
+                Text(
+                  'נסו את מערכת הערכות!',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'מערכת ערכות דינמית עם תמיכה מלאה בצבעים בהירים וכהים',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textDirection: TextDirection.rtl,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'מצב נוכחי: ${themeNotifier.currentThemeDisplayName}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                _buildThemeButton(
+                  context,
+                  icon: Icons.light_mode,
+                  label: 'מצב בהיר',
+                  isSelected: currentTheme == ThemeMode.light,
+                  onPressed: () => themeNotifier.setLightTheme(),
+                ),
+                _buildThemeButton(
+                  context,
+                  icon: Icons.dark_mode,
+                  label: 'מצב כהה',
+                  isSelected: currentTheme == ThemeMode.dark,
+                  onPressed: () => themeNotifier.setDarkTheme(),
+                ),
+                _buildThemeButton(
+                  context,
+                  icon: Icons.auto_mode,
+                  label: 'לפי המכשיר',
+                  isSelected: currentTheme == ThemeMode.system,
+                  onPressed: () => themeNotifier.setSystemTheme(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildThemeButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onPressed,
+  }) {
+    return FilledButton.tonalIcon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: FilledButton.styleFrom(
+        backgroundColor: isSelected 
+          ? Theme.of(context).colorScheme.primary 
+          : Theme.of(context).colorScheme.surfaceVariant,
+        foregroundColor: isSelected 
+          ? Theme.of(context).colorScheme.onPrimary 
+          : Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mindflow/theme.dart';
+import 'package:mindflow/core/theme/app_theme.dart';
+import 'package:mindflow/core/theme/theme_provider.dart';
 import 'package:mindflow/services/notification_service.dart';
 import 'package:mindflow/services/database_service.dart';
 import 'package:mindflow/core/router.dart';
@@ -17,7 +18,7 @@ void main() async {
   
   if (kUseDemo) {
     // Run the demo version without Firebase dependencies
-    runApp(const DemoApp());
+    runApp(const ProviderScope(child: DemoApp()));
     return;
   }
   
@@ -54,13 +55,14 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
     
     return MaterialApp.router(
       title: 'FocusFlow - עוזר המשימות החכם',
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       locale: const Locale('he', 'IL'),
       // Add Hebrew localization support
